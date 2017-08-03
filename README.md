@@ -1,2 +1,2 @@
 # go-rest-service
-An basic REST service written in GO.
+An basic REST service (todo app) written in GO.
