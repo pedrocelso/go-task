@@ -30,7 +30,7 @@ type Mysql struct {
 var cfg *Config
 
 // MustInit initializes the config
-func MustInit() *Config {
+func Init() *Config {
 	_, currentFilename, _, ok := runtime.Caller(0)
 	if !ok {
 		log.Fatal(1, "Unable to get current directory for config.yaml\n")
