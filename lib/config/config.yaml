@@ -1,9 +1,0 @@
-server:
-  port: 8080
-
-mysql:
-  host     : dockerip
-  user     : root
-  password : password
-  database : todo
-  port     : 3306
