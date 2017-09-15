@@ -12,7 +12,8 @@ I'm working on this project to get to know more about REST services in GO. Speci
 5. Add an new Entity `Task` that will be assigned to a given `User`
 
 ## Plus
-As I don't have a tight deadline, I will try to develop this using vim.
+~~As I don't have a tight deadline, I will try to develop this using vim.~~
+_Nevermind! I'm using JetBrains GoGland and I'm pretty happy with it._ 
 
 ## Trivia
 https://cloud.google.com/free/docs/always-free-usage-limits 
