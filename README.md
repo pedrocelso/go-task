@@ -17,3 +17,10 @@ _Nevermind! I'm using JetBrains GoGland and I'm pretty happy with it._
 
 ## Trivia
 https://cloud.google.com/free/docs/always-free-usage-limits 
+
+### Local Unit Testing for Go
+https://cloud.google.com/appengine/docs/standard/go/tools/localunittesting/
+
+### AppEngine Test Package (aetest)
+https://cloud.google.com/appengine/docs/standard/go/tools/localunittesting/reference
+
