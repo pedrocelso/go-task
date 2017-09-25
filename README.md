@@ -1,6 +1,8 @@
 # go-rest-service
 An basic REST service (todo app) written in GO.
 
+There's an basic UI for this service at: https://github.com/pedrocelso/go-rest-service-ui
+
 ## About the project
 I'm working on this project to get to know more about REST services in GO. Specifically, my final goal is to have an fully functional REST service running on Google AppEngine (GAE).
 
