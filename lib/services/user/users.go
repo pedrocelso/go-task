@@ -79,6 +79,9 @@ func GetUsers(c context.Context) ([]User, error) {
 		return nil, err
 	}
 
+	if len(output) <= 0 {
+		return nil, fmt.Errorf("no users found")
+	}
 	return output, nil
 }
 
