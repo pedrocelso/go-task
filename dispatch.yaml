@@ -1,0 +1,9 @@
+dispatch:
+  - url: "*/favicon.ico"
+    service: frontend
+
+  - url: "frontend-dot-go-rest-service.appspot.com/"
+    service: frontend
+
+  - url: "api-dot-go-rest-service.appspot.com/"
+    service: api
