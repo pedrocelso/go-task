@@ -7,7 +7,7 @@ import (
 	"google.golang.org/appengine/log"
 
 	"github.com/gin-gonic/gin"
-	"github.com/pedrocelso/go-rest-service/api/lib/services/user"
+	"github.com/pedrocelso/go-rest-service/lib/services/user"
 )
 
 // CreateUser creates an User
