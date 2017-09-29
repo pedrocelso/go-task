@@ -1,9 +1,9 @@
 dispatch:
   - url: "*/favicon.ico"
-    service: frontend
+    service: default
 
-  - url: "frontend-dot-go-rest-service.appspot.com/"
-    service: frontend
+  - url: "pedrocelso.com.br/"
+    service: default
 
-  - url: "api-dot-go-rest-service.appspot.com/"
+  - url: "api.pedrocelso.com.br/*"
     service: api
