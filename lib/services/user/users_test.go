@@ -1,10 +1,11 @@
-package user
+package user_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
+	"github.com/pedrocelso/go-rest-service/lib/services/user"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/aetest"
 )
@@ -22,7 +23,7 @@ func TestCreateUser(t *testing.T) {
 	}
 	c1 := appengine.NewContext(req1)
 
-	output, err := Create(c1, &User{
+	output, err := user.Create(c1, &user.User{
 		Name:  `Pedro Costa`,
 		Email: `pedrocelsonunes@gmail.com`,
 	})

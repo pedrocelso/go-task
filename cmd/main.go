@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/pedrocelso/go-rest-service/api/lib/controllers"
+	"github.com/pedrocelso/go-rest-service/lib/controllers"
 )
 
 func init() {
