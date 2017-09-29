@@ -1,5 +1,6 @@
 # go-rest-service
 [![CircleCI](https://circleci.com/gh/pedrocelso/go-rest-service/tree/master.svg?style=shield)](https://circleci.com/gh/pedrocelso/go-rest-service/tree/master)
+
 An basic REST service (todo app) written in GO.
 
 There's an basic UI for this service at: https://github.com/pedrocelso/go-rest-service-ui
