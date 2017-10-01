@@ -48,7 +48,7 @@ func GetUser(c *gin.Context) {
 func GetUsers(c *gin.Context) {
 	var err error
 	ctx := appengine.NewContext(c.Request)
-	var output *[]user.User
+	var output []user.User
 
 	if output, err = user.GetUsers(ctx); err == nil {
 		c.JSON(http.StatusOK, output)
