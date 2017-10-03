@@ -1,21 +1,23 @@
 # go-rest-service
+(Working on a better name)
 [![CircleCI](https://circleci.com/gh/pedrocelso/go-rest-service/tree/master.svg?style=shield)](https://circleci.com/gh/pedrocelso/go-rest-service/tree/master)
 
-An basic REST service (todo app) written in GO.
+An basic REST service (tasks) written in GO.
 
 There's an basic UI for this service at: https://github.com/pedrocelso/go-rest-service-ui
 
 ## About the project
-I'm working on this project to get to know more about REST services in GO. Specifically, my final goal is to have an fully functional REST service running on Google AppEngine (GAE).
+An generic task abstraction. Users can have unlimited tasks, each task can have unlimited incidents.
 
-It should support Task creation per User, and each Task can have multiple incidents (or observations).
+An incident can be any kind of interation between the user and its task. It can be observations from a phone call, an email body, even an numeric workflow (not implemented).
 
 ## Milestones
-1. ~~Create an basic MVP saving and retrieving data on MySQL;~~
-2. ~~Do whatever is needed to get it up and running on GAE.~~
-3. ~~Move the database from MySQL to a noSQL (Google Datastore?)~~
-4. Add authentication;
-5. Add an new Entity `Task` that will be assigned to a given `User`
+1. ~~Create basic routes and handlers;~~
+2. ~~Add basic CRUD operations for `Users`;~~
+3. ~~Do whatever is needed to make it GAE-compatible;~~
+4. ~~Move the database from MySQL to Google Datastore?;~~
+4. [Add JWT authentication](https://github.com/pedrocelso/go-rest-service/issues/9);
+5. Add an new Entity `Task` that will be assigned to a given `User` See [Task Endpoints](https://github.com/pedrocelso/go-rest-service/issues/8)
 6. Add an new Entity `Incident` that will be assigned to a given `Task`
 
 ## Trivia
