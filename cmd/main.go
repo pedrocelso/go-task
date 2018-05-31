@@ -2,14 +2,16 @@ package main
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/pedrocelso/go-rest-service/lib/controllers"
+	"github.com/pedrocelso/go-rest-service/lib/http/controllers"
 )
 
 func init() {
 	router := gin.New()
 	router.Use(controllers.CORSMiddleware())
+	router.Use(controllers.CheckJWT(os.Getenv("JWT_SECRET")))
 	router.OPTIONS("/", func(c *gin.Context) {})
 
 	v1 := router.Group("/v1")

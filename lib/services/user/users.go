@@ -5,7 +5,7 @@ import (
 
 	"strings"
 
-	"golang.org/x/net/context"
+	"github.com/pedrocelso/go-rest-service/lib/http/authcontext"
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
 )
@@ -22,7 +22,7 @@ type User struct {
 }
 
 // Create an user
-func Create(c context.Context, usr *User) (*User, error) {
+func Create(c authcontext.Context, usr *User) (*User, error) {
 	var output *User
 	if usr == nil || usr.Email == `` {
 		return nil, fmt.Errorf(invalidUserData)
@@ -31,33 +31,33 @@ func Create(c context.Context, usr *User) (*User, error) {
 	output, _ = GetByEmail(c, usr.Email)
 
 	if output == nil {
-		key := datastore.NewKey(c, index, usr.Email, 0, nil)
-		insKey, err := datastore.Put(c, key, usr)
+		key := datastore.NewKey(c.AppEngineCtx, index, usr.Email, 0, nil)
+		insKey, err := datastore.Put(c.AppEngineCtx, key, usr)
 
 		if err != nil {
-			log.Errorf(c, "ERROR INSERTING USER: %v", err.Error())
+			log.Errorf(c.AppEngineCtx, "ERROR INSERTING USER: %v", err.Error())
 			return nil, err
 		}
 
 		output, err = GetByEmail(c, insKey.StringID())
 		if err != nil {
-			log.Errorf(c, "ERROR GETTING USER OUTPUT: %v", err.Error())
+			log.Errorf(c.AppEngineCtx, "ERROR GETTING USER OUTPUT: %v", err.Error())
 			return nil, err
 		}
 		return output, nil
 	}
-	log.Infof(c, "User was previously saved: %v", usr.Email)
+	log.Infof(c.AppEngineCtx, "User was previously saved: %v", usr.Email)
 	return output, nil
 }
 
 // GetByEmail an user based on its Email
-func GetByEmail(c context.Context, email string) (*User, error) {
+func GetByEmail(c authcontext.Context, email string) (*User, error) {
 	if email == `` {
 		return nil, fmt.Errorf(invalidUserData)
 	}
-	userKey := datastore.NewKey(c, index, email, 0, nil)
+	userKey := datastore.NewKey(c.AppEngineCtx, index, email, 0, nil)
 	var usr User
-	err := datastore.Get(c, userKey, &usr)
+	err := datastore.Get(c.AppEngineCtx, userKey, &usr)
 
 	if err != nil {
 		if strings.HasPrefix(err.Error(), `datastore: no such entity`) {
@@ -69,13 +69,14 @@ func GetByEmail(c context.Context, email string) (*User, error) {
 }
 
 // GetUsers Fetches all users
-func GetUsers(c context.Context) ([]User, error) {
+func GetUsers(c authcontext.Context) ([]User, error) {
+	log.Debugf(c.AppEngineCtx, "GETTING ALL USERS FOR %s/%s", c.AuthUser.Name, c.AuthUser.Email)
 	var output []User
 	q := datastore.NewQuery(index)
-	_, err := q.GetAll(c, &output)
+	_, err := q.GetAll(c.AppEngineCtx, &output)
 
 	if err != nil {
-		log.Errorf(c, "error fetching all users")
+		log.Errorf(c.AppEngineCtx, "error fetching all users")
 		return nil, err
 	}
 
@@ -86,24 +87,24 @@ func GetUsers(c context.Context) ([]User, error) {
 }
 
 // Update user data
-func Update(c context.Context, usr *User) (*User, error) {
+func Update(c authcontext.Context, usr *User) (*User, error) {
 	if usr == nil || usr.Email == `` {
 		return nil, fmt.Errorf(invalidUserData)
 	}
 
 	output, _ := GetByEmail(c, usr.Email)
 	if output != nil {
-		key := datastore.NewKey(c, index, usr.Email, 0, nil)
-		insKey, err := datastore.Put(c, key, usr)
+		key := datastore.NewKey(c.AppEngineCtx, index, usr.Email, 0, nil)
+		insKey, err := datastore.Put(c.AppEngineCtx, key, usr)
 
 		if err != nil {
-			log.Errorf(c, "ERROR UPDATING USER: %v", err.Error())
+			log.Errorf(c.AppEngineCtx, "ERROR UPDATING USER: %v", err.Error())
 			return nil, err
 		}
 
 		output, err = GetByEmail(c, insKey.StringID())
 		if err != nil {
-			log.Errorf(c, "ERROR GETTING USER OUTPUT: %v", err.Error())
+			log.Errorf(c.AppEngineCtx, "ERROR GETTING USER OUTPUT: %v", err.Error())
 			return nil, err
 		}
 		return output, nil
@@ -112,17 +113,17 @@ func Update(c context.Context, usr *User) (*User, error) {
 }
 
 // Delete an user based on its email.
-func Delete(c context.Context, email string) error {
+func Delete(c authcontext.Context, email string) error {
 	var output *User
 	output, _ = GetByEmail(c, email)
 
 	if output != nil {
-		log.Infof(c, "Deleting user: %v", email)
-		key := datastore.NewKey(c, index, email, 0, nil)
-		err := datastore.Delete(c, key)
+		log.Infof(c.AppEngineCtx, "Deleting user: %v", email)
+		key := datastore.NewKey(c.AppEngineCtx, index, email, 0, nil)
+		err := datastore.Delete(c.AppEngineCtx, key)
 
 		if err != nil {
-			log.Errorf(c, "ERROR DELETING USER: %v", err.Error())
+			log.Errorf(c.AppEngineCtx, "ERROR DELETING USER: %v", err.Error())
 			return err
 		}
 		return nil

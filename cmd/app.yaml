@@ -4,3 +4,5 @@ api_version: go1.8
 handlers:
 - url: /.*
   script: _go_app
+env_variables:
+  JWT_SECRET: 'exevo gran mas vis'

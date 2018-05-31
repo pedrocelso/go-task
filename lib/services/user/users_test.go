@@ -5,8 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"context"
-
+	"github.com/pedrocelso/go-rest-service/lib/http/authcontext"
 	"github.com/pedrocelso/go-rest-service/lib/services/user"
 	"github.com/stretchr/testify/assert"
 
@@ -18,11 +17,11 @@ import (
 
 const email = `pedro@pedrocelso.com.br`
 
-var mainCtx context.Context
+var mainCtx authcontext.Context
 
 func TestMain(m *testing.M) {
 	ctx, done, _ := aetest.NewContext()
-	mainCtx = ctx
+	mainCtx.AppEngineCtx = ctx
 	_ = createUsers(mainCtx)
 	os.Exit(m.Run())
 	done()
@@ -77,19 +76,21 @@ func TestGetByEmail(t *testing.T) {
 	assert.Nil(t, output)
 }
 
-// This test run ina  different context ot ensure that only
+// This test run on a different context ot ensure that only
 // the created users will be saved on the datastore
 func TestGetUsers(t *testing.T) {
+	var authCtx authcontext.Context
 	ctx, done, err := aetest.NewContext()
+	authCtx.AppEngineCtx = ctx
 	defer done()
-	err = createUsers(ctx)
+	err = createUsers(authCtx)
 	if err != nil {
 		t.Fatal(err)
 	}
 	// This sleep is needed because it take some milliseconds for the objects
 	// created on `createUsers` to be indexed and returned on query
 	time.Sleep(time.Millisecond * 5e2)
-	output, err := user.GetUsers(ctx)
+	output, err := user.GetUsers(authCtx)
 	assert.Nil(t, err)
 	assert.NotNil(t, output)
 	assert.Equal(t, 5, len(output))
@@ -137,12 +138,12 @@ func TestDeleteUser(t *testing.T) {
 	assert.Nil(t, usr)
 }
 
-func createUsers(ctx context.Context) error {
+func createUsers(ctx authcontext.Context) error {
 	for i := 0; i < 5; i++ {
 		email := fmt.Sprintf(`%v%v`, email, i)
 		name := fmt.Sprintf(`Pedro %v`, i)
-		key := datastore.NewKey(ctx, `User`, email, 0, nil)
-		if _, err := datastore.Put(ctx, key, &user.User{
+		key := datastore.NewKey(ctx.AppEngineCtx, `User`, email, 0, nil)
+		if _, err := datastore.Put(ctx.AppEngineCtx, key, &user.User{
 			Name:  name,
 			Email: email,
 		}); err != nil {

@@ -3,12 +3,15 @@ package controllers
 import (
 	"fmt"
 
+	"github.com/auth0/go-jwt-middleware"
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
 
 // ResponseObject is a simple mapping obejct
 type ResponseObject map[string]interface{}
 
+// CORSMiddleware enable CORS
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
@@ -23,6 +26,21 @@ func CORSMiddleware() gin.HandlerFunc {
 			c.AbortWithStatus(200)
 		} else {
 			c.Next()
+		}
+	}
+}
+
+// CheckJWT checks the JWT
+func CheckJWT(secret string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		jwtMid := *jwtmiddleware.New(jwtmiddleware.Options{
+			ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
+				return []byte(secret), nil
+			},
+			SigningMethod: jwt.SigningMethodHS256,
+		})
+		if err := jwtMid.CheckJWT(c.Writer, c.Request); err != nil {
+			c.AbortWithStatus(401)
 		}
 	}
 }

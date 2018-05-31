@@ -3,10 +3,10 @@ package controllers
 import (
 	"net/http"
 
-	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/pedrocelso/go-rest-service/lib/http/authcontext"
 	"github.com/pedrocelso/go-rest-service/lib/services/user"
 )
 
@@ -15,7 +15,7 @@ func CreateUser(c *gin.Context) {
 	var usr *user.User
 	var err error
 	var output *user.User
-	ctx := appengine.NewContext(c.Request)
+	ctx := authcontext.NewAuthContext(c)
 
 	if err = c.BindJSON(&usr); err == nil {
 		if output, err = user.Create(ctx, usr); err == nil {
@@ -24,7 +24,7 @@ func CreateUser(c *gin.Context) {
 	}
 
 	if err != nil {
-		log.Errorf(ctx, "ERROR: %v", err.Error())
+		log.Errorf(ctx.AppEngineCtx, "ERROR: %v", err.Error())
 		c.JSON(http.StatusPreconditionFailed, ResponseObject{"error": err.Error()})
 	}
 }
@@ -34,7 +34,7 @@ func GetUser(c *gin.Context) {
 	var err error
 	var output *user.User
 	usrEmail := c.Param("userEmail")
-	ctx := appengine.NewContext(c.Request)
+	ctx := authcontext.NewAuthContext(c)
 
 	if output, err = user.GetByEmail(ctx, usrEmail); err == nil {
 		c.JSON(http.StatusOK, output)
@@ -44,13 +44,13 @@ func GetUser(c *gin.Context) {
 	}
 }
 
-// GetUsers Fectch all users
+// GetUsers Fetch all users
 func GetUsers(c *gin.Context) {
 	var err error
-	ctx := appengine.NewContext(c.Request)
+
 	var output []user.User
 
-	if output, err = user.GetUsers(ctx); err == nil {
+	if output, err = user.GetUsers(authcontext.NewAuthContext(c)); err == nil {
 		c.JSON(http.StatusOK, output)
 	}
 
@@ -64,7 +64,7 @@ func UpdateUser(c *gin.Context) {
 	var usr *user.User
 	var err error
 	var output *user.User
-	ctx := appengine.NewContext(c.Request)
+	ctx := authcontext.NewAuthContext(c)
 
 	if err = c.BindJSON(&usr); err == nil {
 		if output, err = user.Update(ctx, usr); err == nil {
@@ -73,7 +73,7 @@ func UpdateUser(c *gin.Context) {
 	}
 
 	if err != nil {
-		log.Errorf(ctx, "ERROR: %v", err.Error())
+		log.Errorf(ctx.AppEngineCtx, "ERROR: %v", err.Error())
 		c.JSON(http.StatusPreconditionFailed, ResponseObject{"error": err.Error()})
 	}
 }
@@ -81,12 +81,12 @@ func UpdateUser(c *gin.Context) {
 // DeleteUser deletes an user based on its email
 func DeleteUser(c *gin.Context) {
 	usrEmail := c.Param("userEmail")
-	ctx := appengine.NewContext(c.Request)
+	ctx := authcontext.NewAuthContext(c)
 
 	err := user.Delete(ctx, usrEmail)
 
 	if err != nil {
-		log.Errorf(ctx, "ERROR: %v", err.Error())
+		log.Errorf(ctx.AppEngineCtx, "ERROR: %v", err.Error())
 		c.JSON(http.StatusPreconditionFailed, ResponseObject{"error": err.Error()})
 	}
 	c.JSON(http.StatusOK, ResponseObject{"result": "ok"})
