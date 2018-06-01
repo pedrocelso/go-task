@@ -23,5 +23,12 @@ func init() {
 	users.PUT("/:userEmail", controllers.UpdateUser)
 	users.DELETE("/:userEmail", controllers.DeleteUser)
 
+	tasks := v1.Group("/tasks")
+	tasks.POST("/", controllers.CreateTask)
+	tasks.GET("/:taskId", controllers.GetTask)
+	tasks.GET("/", controllers.GetTasks)
+	tasks.PUT("/:taskId", controllers.UpdateTask)
+	tasks.DELETE("/:taskId", controllers.DeleteTask)
+
 	http.Handle("/", router)
 }
