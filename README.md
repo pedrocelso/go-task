@@ -16,7 +16,7 @@ An incident can be any kind of interation between the user and its task. It can 
 2. ~~Add basic CRUD operations for `Users`;~~
 3. ~~Do whatever is needed to make it GAE-compatible;~~
 4. ~~Move the database from MySQL to Google Datastore?;~~
-4. [Add JWT authentication](https://github.com/pedrocelso/go-rest-service/issues/9);
+4. ~~[Add JWT authentication](https://github.com/pedrocelso/go-rest-service/issues/9);~~
 5. Add an new Entity `Task` that will be assigned to a given `User` See [Task Endpoints](https://github.com/pedrocelso/go-rest-service/issues/8)
 6. Add an new Entity `Incident` that will be assigned to a given `Task`
 
