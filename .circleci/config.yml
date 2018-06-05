@@ -15,6 +15,7 @@ jobs:
       - checkout
       - run: go get -v -t -d ./...
       - run: go test -v lib/http/controllers/controllers_test.go
+      - run: go test -v lib/services/task/tasks_test.go
       - run: go test -v lib/services/user/users_test.go
 
 
