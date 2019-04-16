@@ -1,6 +1,7 @@
 package user_test
 
 import (
+	"context"
 	"os"
 	"testing"
 	"time"
@@ -11,16 +12,21 @@ import (
 
 	"fmt"
 
-	"google.golang.org/appengine/aetest"
 	"cloud.google.com/go/datastore"
+	"google.golang.org/appengine/aetest"
 )
 
 const email = `pedro@pedrocelso.com.br`
 
 var mainCtx authcontext.Context
+var c context.Context
+var client *datastore.Client
 
 func TestMain(m *testing.M) {
 	ctx, done, _ := aetest.NewContext()
+	c := context.Background()
+	client, _ := datastore.NewClient(c, "go-rest-client")
+	mainCtx.DataStoreClient = client
 	mainCtx.AppEngineCtx = ctx
 	_ = createUsers(mainCtx)
 	os.Exit(m.Run())
@@ -28,7 +34,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestCreateUser(t *testing.T) {
-	output, err := user.Create(mainCtx, &user.User{
+	output, err := user.Create(&mainCtx, &user.User{
 		Name:  `Pedro Costa`,
 		Email: `pedro@pedrocelso.com.br`,
 	})
@@ -38,12 +44,12 @@ func TestCreateUser(t *testing.T) {
 	assert.Equal(t, "Pedro Costa", output.Name)
 	assert.Equal(t, "pedro@pedrocelso.com.br", output.Email)
 
-	output, err = user.Create(mainCtx, nil)
+	output, err = user.Create(&mainCtx, nil)
 	assert.NotNil(t, err)
 	assert.Equal(t, "error: invalid User data", err.Error())
 	assert.Nil(t, output)
 
-	output, err = user.Create(mainCtx, &user.User{
+	output, err = user.Create(&mainCtx, &user.User{
 		Name:  `Pedro Costa`,
 		Email: ``,
 	})
@@ -59,18 +65,18 @@ func TestGetByEmail(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	output, err := user.GetByEmail(mainCtx, `pedro@pedrocelso.com.br1`)
+	output, err := user.GetByEmail(&mainCtx, `pedro@pedrocelso.com.br1`)
 	assert.Nil(t, err)
 	assert.NotNil(t, output)
 	assert.Equal(t, "Pedro 1", output.Name)
 	assert.Equal(t, "pedro@pedrocelso.com.br1", output.Email)
 
-	output, err = user.GetByEmail(mainCtx, `bad_email@gmail.com`)
+	output, err = user.GetByEmail(&mainCtx, `bad_email@gmail.com`)
 	assert.NotNil(t, err)
 	assert.Equal(t, "user 'bad_email@gmail.com' not found", err.Error())
 	assert.Nil(t, output)
 
-	output, err = user.GetByEmail(mainCtx, ``)
+	output, err = user.GetByEmail(&mainCtx, ``)
 	assert.NotNil(t, err)
 	assert.Equal(t, `error: invalid User data`, err.Error())
 	assert.Nil(t, output)
@@ -90,7 +96,7 @@ func TestGetUsers(t *testing.T) {
 	// This sleep is needed because it take some milliseconds for the objects
 	// created on `createUsers` to be indexed and returned on query
 	time.Sleep(time.Millisecond * 5e2)
-	output, err := user.GetUsers(authCtx)
+	output, err := user.GetUsers(&authCtx)
 	assert.Nil(t, err)
 	assert.NotNil(t, output)
 	assert.Equal(t, 5, len(output))
@@ -99,7 +105,7 @@ func TestGetUsers(t *testing.T) {
 func TestUpdateUser(t *testing.T) {
 	err := createUsers(mainCtx)
 
-	output, err := user.Update(mainCtx, &user.User{
+	output, err := user.Update(&mainCtx, &user.User{
 		Name:  `Migeh`,
 		Email: `pedro@pedrocelso.com.br0`,
 	})
@@ -108,13 +114,13 @@ func TestUpdateUser(t *testing.T) {
 	assert.Equal(t, "Migeh", output.Name)
 	assert.Equal(t, "pedro@pedrocelso.com.br0", output.Email)
 
-	usr, err := user.GetByEmail(mainCtx, `pedro@pedrocelso.com.br0`)
+	usr, err := user.GetByEmail(&mainCtx, `pedro@pedrocelso.com.br0`)
 	assert.Nil(t, err)
 	assert.NotNil(t, output)
 	assert.Equal(t, "Migeh", usr.Name)
 	assert.Equal(t, "pedro@pedrocelso.com.br0", usr.Email)
 
-	output, err = user.Update(mainCtx, nil)
+	output, err = user.Update(&mainCtx, nil)
 	assert.NotNil(t, err)
 	assert.Equal(t, "error: invalid User data", err.Error())
 	assert.Nil(t, output)
@@ -123,16 +129,16 @@ func TestUpdateUser(t *testing.T) {
 func TestDeleteUser(t *testing.T) {
 	err := createUsers(mainCtx)
 
-	usr, err := user.GetByEmail(mainCtx, `pedro@pedrocelso.com.br0`)
+	usr, err := user.GetByEmail(&mainCtx, `pedro@pedrocelso.com.br0`)
 	assert.Nil(t, err)
 	assert.NotNil(t, usr)
 	assert.Equal(t, "Pedro 0", usr.Name)
 	assert.Equal(t, "pedro@pedrocelso.com.br0", usr.Email)
 
-	err = user.Delete(mainCtx, `pedro@pedrocelso.com.br0`)
+	err = user.Delete(&mainCtx, `pedro@pedrocelso.com.br0`)
 	assert.Nil(t, err)
 
-	usr, err = user.GetByEmail(mainCtx, `pedro@pedrocelso.com.br0`)
+	usr, err = user.GetByEmail(&mainCtx, `pedro@pedrocelso.com.br0`)
 	assert.NotNil(t, err)
 	assert.Equal(t, "user 'pedro@pedrocelso.com.br0' not found", err.Error())
 	assert.Nil(t, usr)
@@ -142,8 +148,8 @@ func createUsers(ctx authcontext.Context) error {
 	for i := 0; i < 5; i++ {
 		email := fmt.Sprintf(`%v%v`, email, i)
 		name := fmt.Sprintf(`Pedro %v`, i)
-		key := datastore.NewKey(ctx.AppEngineCtx, `User`, email, 0, nil)
-		if _, err := datastore.Put(ctx.AppEngineCtx, key, &user.User{
+		key := datastore.NameKey(`User`, email, nil)
+		if _, err := client.Put(ctx.AppEngineCtx, key, &user.User{
 			Name:  name,
 			Email: email,
 		}); err != nil {
