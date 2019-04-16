@@ -6,8 +6,8 @@ import (
 	"google.golang.org/appengine/log"
 
 	"github.com/gin-gonic/gin"
-	"github.com/pedrocelso/go-rest-service/lib/http/authcontext"
-	"github.com/pedrocelso/go-rest-service/lib/services/user"
+	"github.com/pedrocelso/go-task/lib/http/authcontext"
+	"github.com/pedrocelso/go-task/lib/services/user"
 )
 
 // CreateUser creates an User

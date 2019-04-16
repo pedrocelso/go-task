@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/pedrocelso/go-rest-service/lib/http/controllers"
+	"github.com/pedrocelso/go-task/lib/http/controllers"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/gin-gonic/gin"

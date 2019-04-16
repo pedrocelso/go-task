@@ -5,10 +5,10 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/pedrocelso/go-rest-service/lib/http/controllers"
+	"github.com/pedrocelso/go-task/lib/http/controllers"
 )
 
-func init() {
+func main() {
 	router := gin.New()
 	router.Use(controllers.CORSMiddleware())
 	router.Use(controllers.CheckJWT(os.Getenv("JWT_SECRET")))

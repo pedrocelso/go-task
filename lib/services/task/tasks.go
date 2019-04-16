@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/pedrocelso/go-rest-service/lib/http/authcontext"
+	"github.com/pedrocelso/go-task/lib/http/authcontext"
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
 )

@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/pedrocelso/go-rest-service/lib/http/authcontext"
-	"github.com/pedrocelso/go-rest-service/lib/services/user"
+	"github.com/pedrocelso/go-task/lib/http/authcontext"
+	"github.com/pedrocelso/go-task/lib/services/user"
 	"github.com/stretchr/testify/assert"
 
 	"fmt"

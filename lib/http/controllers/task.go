@@ -5,8 +5,8 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/pedrocelso/go-rest-service/lib/http/authcontext"
-	"github.com/pedrocelso/go-rest-service/lib/services/task"
+	"github.com/pedrocelso/go-task/lib/http/authcontext"
+	"github.com/pedrocelso/go-task/lib/services/task"
 	"google.golang.org/appengine/log"
 )
 
