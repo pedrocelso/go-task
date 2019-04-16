@@ -1,11 +1,11 @@
 package main
 
 import (
-	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pedrocelso/go-task/lib/http/controllers"
+	"google.golang.org/appengine"
 )
 
 func main() {
@@ -30,5 +30,6 @@ func main() {
 	tasks.PUT("/:taskId", controllers.UpdateTask)
 	tasks.DELETE("/:taskId", controllers.DeleteTask)
 
-	http.Handle("/", router)
+	router.Run()
+	appengine.Main()
 }

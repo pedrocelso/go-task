@@ -11,7 +11,7 @@ import (
 	"fmt"
 
 	"google.golang.org/appengine/aetest"
-	"google.golang.org/appengine/datastore"
+	"cloud.google.com/go/datastore"
 )
 
 var mainCtx authcontext.Context

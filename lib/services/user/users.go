@@ -5,8 +5,8 @@ import (
 
 	"strings"
 
+	"cloud.google.com/go/datastore"
 	"github.com/pedrocelso/go-task/lib/http/authcontext"
-	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
 )
 
