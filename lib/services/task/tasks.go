@@ -4,8 +4,8 @@ package task
 // 	"fmt"
 // 	"strings"
 
-// 	"github.com/pedrocelso/go-task/lib/http/authcontext"
 // 	"cloud.google.com/go/datastore"
+// 	"github.com/pedrocelso/go-task/lib/http/authcontext"
 // 	"google.golang.org/appengine/log"
 // )
 
@@ -25,12 +25,16 @@ package task
 // // Create aa task
 // func Create(c authcontext.Context, task *Task) (*Task, error) {
 // 	var output *Task
+// 	var keys []*datastore.Key
 // 	if task == nil {
 // 		return nil, fmt.Errorf(invalidTaskData)
 // 	}
 
-// 	userKey := datastore.NewKey(c.AppEngineCtx, userIndex, c.AuthUser.Email, 0, nil)
-// 	low, high, err := datastore.AllocateIDs(c.AppEngineCtx, index, userKey, 1)
+// 	userKey := datastore.NameKey(userIndex, c.AuthUser.Email, nil)
+// 	incompleteKey := datastore.IncompleteKey(index, userKey)
+// 	keys = append(keys, incompleteKey)
+
+// 	completeKeys, err := c.DataStoreClient.AllocateIDs(c.AppEngineCtx, keys)
 // 	if err != nil {
 // 		log.Errorf(c.AppEngineCtx, "ERROR ON TASK ID GENERATION", err.Error())
 // 		return nil, err

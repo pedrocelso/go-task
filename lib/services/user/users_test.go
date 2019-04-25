@@ -20,17 +20,40 @@ const email = `pedro@pedrocelso.com.br`
 
 var mainCtx authcontext.Context
 var c context.Context
-var client *datastore.Client
+var client authcontext.PersistenceClient
+
+type MockClient struct {
+
+}
+
+func (mc MockClient) Delete(ctx context.Context, key *datastore.Key) error {
+	return nil;
+}
+
+func (mc MockClient) Get(ctx context.Context, key *datastore.Key, dst interface{}) (err error) {
+	if key.Name == `pedro@pedrocelso.com.br` {
+		dst.Name = `Pedro Costa`
+		dst.Email = `pedro@pedrocelso.com.br`
+	}
+	
+	return nil;
+}
+
+func (mc MockClient) GetAll(ctx context.Context, q *datastore.Query, dst interface{}) (keys []*datastore.Key, err error) {
+	return nil, nil;
+}
+
+func (mc MockClient) Put(ctx context.Context, key *datastore.Key, src interface{}) (*datastore.Key, error) {
+	return nil, nil;
+}
 
 func TestMain(m *testing.M) {
-	ctx, done, _ := aetest.NewContext()
 	c := context.Background()
-	client, _ := datastore.NewClient(c, "go-rest-client")
+	client = MockClient{}
 	mainCtx.DataStoreClient = client
-	mainCtx.AppEngineCtx = ctx
+	mainCtx.AppEngineCtx = c
 	_ = createUsers(mainCtx)
 	os.Exit(m.Run())
-	done()
 }
 
 func TestCreateUser(t *testing.T) {
@@ -149,7 +172,7 @@ func createUsers(ctx authcontext.Context) error {
 		email := fmt.Sprintf(`%v%v`, email, i)
 		name := fmt.Sprintf(`Pedro %v`, i)
 		key := datastore.NameKey(`User`, email, nil)
-		if _, err := client.Put(ctx.AppEngineCtx, key, &user.User{
+		if _, err := ctx.DataStoreClient.Put(ctx.AppEngineCtx, key, &user.User{
 			Name:  name,
 			Email: email,
 		}); err != nil {

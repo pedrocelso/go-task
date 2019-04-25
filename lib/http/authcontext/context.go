@@ -9,6 +9,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// PersistenceClient A wrapper aound the datastore client
+type PersistenceClient interface {
+	Delete(ctx context.Context, key *datastore.Key) error
+	Get(ctx context.Context, key *datastore.Key, dst interface{}) (err error)
+	GetAll(ctx context.Context, q *datastore.Query, dst interface{}) (keys []*datastore.Key, err error)
+	Put(ctx context.Context, key *datastore.Key, src interface{}) (*datastore.Key, error)
+}
+
 // AuthUser defines user attributes
 type AuthUser struct {
 	Name  string
@@ -18,7 +26,7 @@ type AuthUser struct {
 // Context holds all the necessary data
 type Context struct {
 	AppEngineCtx    context.Context
-	DataStoreClient *datastore.Client
+	DataStoreClient PersistenceClient
 	GinCtx          *gin.Context
 	AuthUser        AuthUser
 }

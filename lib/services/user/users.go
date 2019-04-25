@@ -22,24 +22,24 @@ type User struct {
 }
 
 // Create an user
-func Create(c *authcontext.Context, usr *User) (*User, error) {
+func Create(ctx *authcontext.Context, usr *User) (*User, error) {
 	var output *User
 	if usr == nil || usr.Email == `` {
 		return nil, fmt.Errorf(invalidUserData)
 	}
 
-	output, _ = GetByEmail(c, usr.Email)
+	output, _ = GetByEmail(ctx, usr.Email)
 
 	if output == nil {
 		key := datastore.NameKey(index, usr.Email, nil)
-		_, err := c.DataStoreClient.Put(c.AppEngineCtx, key, usr)
+		_, err := ctx.DataStoreClient.Put(ctx.AppEngineCtx, key, usr)
 
 		if err != nil {
 			glog.Errorf("ERROR INSERTING USER: %v", err.Error())
 			return nil, err
 		}
 
-		output, err = GetByEmail(c, usr.Email)
+		output, err = GetByEmail(ctx, usr.Email)
 		if err != nil {
 			glog.Errorf("ERROR GETTING USER OUTPUT: %v", err.Error())
 			return nil, err
@@ -51,13 +51,13 @@ func Create(c *authcontext.Context, usr *User) (*User, error) {
 }
 
 // GetByEmail an user based on its Email
-func GetByEmail(c *authcontext.Context, email string) (*User, error) {
+func GetByEmail(ctx *authcontext.Context, email string) (*User, error) {
 	if email == `` {
 		return nil, fmt.Errorf(invalidUserData)
 	}
 	userKey := datastore.NameKey(index, email, nil)
 	var usr User
-	err := c.DataStoreClient.Get(c.AppEngineCtx, userKey, &usr)
+	err := ctx.DataStoreClient.Get(ctx.AppEngineCtx, userKey, &usr)
 
 	if err != nil {
 		if strings.HasPrefix(err.Error(), `datastore: no such entity`) {
@@ -69,11 +69,11 @@ func GetByEmail(c *authcontext.Context, email string) (*User, error) {
 }
 
 // GetUsers Fetches all users
-func GetUsers(c *authcontext.Context) ([]User, error) {
-	glog.Infof("GETTING ALL USERS FOR %s/%s", c.AuthUser.Name, c.AuthUser.Email)
+func GetUsers(ctx *authcontext.Context) ([]User, error) {
+	glog.Infof("GETTING ALL USERS FOR %s/%s", ctx.AuthUser.Name, ctx.AuthUser.Email)
 	var output []User
 	q := datastore.NewQuery(index)
-	_, err := c.DataStoreClient.GetAll(c.AppEngineCtx, q, &output)
+	_, err := ctx.DataStoreClient.GetAll(ctx.AppEngineCtx, q, &output)
 
 	if err != nil {
 		glog.Errorf("error fetching all users")
@@ -87,22 +87,22 @@ func GetUsers(c *authcontext.Context) ([]User, error) {
 }
 
 // Update user data
-func Update(c *authcontext.Context, usr *User) (*User, error) {
+func Update(ctx *authcontext.Context, usr *User) (*User, error) {
 	if usr == nil || usr.Email == `` {
 		return nil, fmt.Errorf(invalidUserData)
 	}
 
-	output, _ := GetByEmail(c, usr.Email)
+	output, _ := GetByEmail(ctx, usr.Email)
 	if output != nil {
 		key := datastore.NameKey(index, usr.Email, nil)
-		_, err := c.DataStoreClient.Put(c.AppEngineCtx, key, usr)
+		_, err := ctx.DataStoreClient.Put(ctx.AppEngineCtx, key, usr)
 
 		if err != nil {
 			glog.Errorf("ERROR UPDATING USER: %v", err.Error())
 			return nil, err
 		}
 
-		output, err = GetByEmail(c, usr.Email)
+		output, err = GetByEmail(ctx, usr.Email)
 		if err != nil {
 			glog.Errorf("ERROR GETTING USER OUTPUT: %v", err.Error())
 			return nil, err
@@ -113,14 +113,14 @@ func Update(c *authcontext.Context, usr *User) (*User, error) {
 }
 
 // Delete an user based on its email.
-func Delete(c *authcontext.Context, email string) error {
+func Delete(ctx *authcontext.Context, email string) error {
 	var output *User
-	output, _ = GetByEmail(c, email)
+	output, _ = GetByEmail(ctx, email)
 
 	if output != nil {
 		glog.Infof("Deleting user: %v", email)
 		key := datastore.NameKey(index, email, nil)
-		err := c.DataStoreClient.Delete(c.AppEngineCtx, key)
+		err := ctx.DataStoreClient.Delete(ctx.AppEngineCtx, key)
 
 		if err != nil {
 			glog.Errorf("ERROR DELETING USER: %v", err.Error())
