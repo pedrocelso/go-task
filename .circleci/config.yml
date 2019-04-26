@@ -6,8 +6,13 @@ jobs:
     working_directory: ~/go-task
     steps:
       - checkout
-      - run: go test github.com/pedrocelso/go-task/lib/http/controllers
-      - run: go test github.com/pedrocelso/go-task/lib/services/user
+      - run:
+        command: |
+          go test ./... -coverprofile=c.out
+          go tool cover -html=c.out -o coverage.html
+          mv coverage.html /tmp/artifacts
+      - store_artifacts:
+          path: /tmp/artifacts
 
 
 
