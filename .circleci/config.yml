@@ -7,7 +7,7 @@ jobs:
     steps:
       - checkout
       - run: go test github.com/pedrocelso/go-task/lib/http/controllers
-      - run: go test github.com/pedrocelso/go-task/lib/services/user/users_test.go
+      - run: go test github.com/pedrocelso/go-task/lib/services/user
 
 
 
