@@ -12,7 +12,7 @@ jobs:
           go tool cover -html=c.out -o coverage.html
           mv coverage.html /tmp/artifacts
       - store_artifacts:
-          path: /tmp/artifacts
+        path: /tmp/artifacts
 
 
 
