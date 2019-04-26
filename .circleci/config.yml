@@ -9,7 +9,9 @@ jobs:
       - run: ls -ld /.config
       - run: echo $PATH
       - run: echo "export PATH=$PATH:/go/google-cloud-sdk/bin" >> $BASH_ENV
+      - run: echo "export GO111MODULE=off" >> $BASH_ENV
       - run: echo $BASH_ENV
+      - run: echo $GO111MODULE
       - run: echo $PATH
       - run: pwd
       - checkout
