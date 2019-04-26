@@ -1,4 +1,4 @@
-FROM circleci/golang:1.8
+FROM circleci/golang
 
 RUN sudo mkdir /.config
 RUN sudo chown circleci:circleci /.config

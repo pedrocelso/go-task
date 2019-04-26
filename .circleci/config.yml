@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: pdacosta/circle-golang-gcloud:0.0.5
+      - image: pdacosta/circle-golang-gcloud:0.0.6
 
     working_directory: /go/src/github.com/pedrocelso/go-task
     steps:
