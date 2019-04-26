@@ -13,7 +13,6 @@ jobs:
       - run: echo $PATH
       - run: pwd
       - checkout
-      - run: go get -v -t -d ./...
       - run: go test github.com/pedrocelso/go-task/lib/http/controllers
       - run: go test github.com/pedrocelso/go-task/lib/services/user/users_test.go
 
