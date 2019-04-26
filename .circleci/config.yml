@@ -6,11 +6,10 @@ jobs:
     working_directory: ~/go-task
     steps:
       - checkout
-      - run:
-          command: |
-            go test ./... -coverprofile=c.out
-            go tool cover -html=c.out -o coverage.html
-            mv coverage.html /tmp/artifacts
+      - run: |
+          go test ./... -coverprofile=c.out
+          go tool cover -html=c.out -o coverage.html
+          mv coverage.html /tmp/artifacts
       - store_artifacts:
         path: /tmp/artifacts
 
