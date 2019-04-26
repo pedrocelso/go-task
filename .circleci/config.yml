@@ -14,8 +14,7 @@ jobs:
       - run: pwd
       - checkout
       - run: go get -v -t -d ./...
-      - run: go test -v lib/http/controllers/controllers_test.go
-      - run: go test -v lib/services/task/tasks_test.go
-      - run: go test -v lib/services/user/users_test.go
+      - run: go test github.com/pedrocelso/go-task/lib/http/controllers
+      - run: go test github.com/pedrocelso/go-task/lib/services/user/users_test.go
 
 
