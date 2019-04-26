@@ -4,7 +4,7 @@ jobs:
     docker:
       - image: pdacosta/circle-golang-gcloud:0.0.6
 
-    working_directory: ~/go-task
+    working_directory: /go/src/github.com/pedrocelso/go-task
     steps:
       - run: ls -ld /.config
       - run: echo $PATH
@@ -17,5 +17,6 @@ jobs:
       - checkout
       - run: go test github.com/pedrocelso/go-task/lib/http/controllers
       - run: go test github.com/pedrocelso/go-task/lib/services/user/users_test.go
+
 
 
