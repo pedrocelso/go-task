@@ -2,18 +2,9 @@ version: 2
 jobs:
   build:
     docker:
-      - image: pdacosta/circle-golang-gcloud:0.0.6
-
-    working_directory: /go/src/github.com/pedrocelso/go-task
+      - image: circleci/golang
+    working_directory: ~/go-task
     steps:
-      - run: ls -ld /.config
-      - run: echo $PATH
-      - run: echo "export PATH=$PATH:/go/google-cloud-sdk/bin" >> $BASH_ENV
-      - run: echo "export GO111MODULE=off" >> $BASH_ENV
-      - run: echo $BASH_ENV
-      - run: echo $GO111MODULE
-      - run: echo $PATH
-      - run: pwd
       - checkout
       - run: go test github.com/pedrocelso/go-task/lib/http/controllers
       - run: go test github.com/pedrocelso/go-task/lib/services/user/users_test.go
