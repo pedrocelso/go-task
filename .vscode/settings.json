@@ -1,3 +1,10 @@
 {
-  "go.formatTool": "goimports"
+  "go.formatTool": "goimports",
+  "go.coverageDecorator": {
+    "type": "gutter",
+    "coveredHighlightColor": "rgba(64,128,128,0.5)",
+    "uncoveredHighlightColor": "rgba(128,64,64,0.25)",
+    "coveredGutterStyle": "blockgreen",
+    "uncoveredGutterStyle": "slashred"
+  }
 }
