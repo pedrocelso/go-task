@@ -176,6 +176,15 @@ func TestGetUsers(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, output)
 	assert.Equal(t, 3, len(output))
+
+	mainCtx.DataStoreClient = MockClient{
+		T:          t,
+		collection: map[string]user.User{},
+	}
+	output, err = user.GetUsers(&mainCtx)
+	assert.NotNil(t, err)
+	assert.Nil(t, output)
+	assert.Equal(t, `no users found`, err.Error())
 }
 
 func TestUpdateUser(t *testing.T) {
@@ -200,6 +209,14 @@ func TestUpdateUser(t *testing.T) {
 	output, err = user.Update(&mainCtx, nil)
 	assert.NotNil(t, err)
 	assert.Equal(t, "error: invalid User data", err.Error())
+	assert.Nil(t, output)
+
+	output, err = user.Update(&mainCtx, &user.User{
+		Name:  `Mr. Jones`,
+		Email: `abrandnew@email.com`,
+	})
+	assert.NotNil(t, err)
+	assert.Equal(t, "user 'abrandnew@email.com' not found", err.Error())
 	assert.Nil(t, output)
 }
 
@@ -226,4 +243,8 @@ func TestDeleteUser(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Equal(t, "user 'pedro@pedrocelso.com.br0' not found", err.Error())
 	assert.Nil(t, usr)
+
+	err = user.Delete(&mainCtx, `abrandnew@email.com`)
+	assert.NotNil(t, err)
+	assert.Equal(t, "user 'abrandnew@email.com' don't exist on the database", err.Error())
 }
