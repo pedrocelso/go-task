@@ -3,8 +3,8 @@ package user_test
 import (
 	"context"
 	"os"
-	"testing"
 	"reflect"
+	"testing"
 
 	"github.com/pedrocelso/go-task/lib/http/authcontext"
 	"github.com/pedrocelso/go-task/lib/services/user"
@@ -22,21 +22,21 @@ var c context.Context
 
 var usersCollection = map[string]user.User{
 	`pedro@pedrocelso.com.br1`: user.User{
-		Name: `Pedro 1`,
+		Name:  `Pedro 1`,
 		Email: `pedro@pedrocelso.com.br1`,
 	},
 	`migeh@pedrocelso.com.br`: user.User{
-		Name: `Mr. Migeh`,
+		Name:  `Mr. Migeh`,
 		Email: `migeh@pedrocelso.com.br`,
 	},
 	`pedro@pedrocelso.com.br0`: user.User{
-		Name: `Pedro 0`,
+		Name:  `Pedro 0`,
 		Email: `pedro@pedrocelso.com.br0`,
 	},
 }
 
 type MockClient struct {
-	T *testing.T
+	T          *testing.T
 	collection map[string]user.User
 }
 
@@ -44,7 +44,7 @@ func (mc MockClient) Delete(ctx context.Context, key *datastore.Key) error {
 	email := key.Name
 
 	if _, ok := mc.collection[email]; ok {
-		delete(mc.collection, email);
+		delete(mc.collection, email)
 	} else {
 		return fmt.Errorf(`datastore: no such entity '%v'`, email)
 	}
@@ -62,30 +62,30 @@ func (mc MockClient) Get(ctx context.Context, key *datastore.Key, dst interface{
 		return fmt.Errorf(`datastore: no such entity '%v'`, email)
 	}
 
-	return nil;
+	return nil
 }
 
 func (mc MockClient) GetAll(ctx context.Context, q *datastore.Query, dst interface{}) (keys []*datastore.Key, err error) {
 	v := reflect.ValueOf(dst).Elem()
 	var users []user.User
 
-	for _, v := range mc.collection { 
+	for _, v := range mc.collection {
 		users = append(users, v)
 	}
 
 	v.Set(reflect.ValueOf(users))
-	
-	return nil, nil;
+
+	return nil, nil
 }
 
 func (mc MockClient) Put(ctx context.Context, key *datastore.Key, src interface{}) (*datastore.Key, error) {
 	assert.Equal(mc.T, `*user.User`, reflect.TypeOf(src).String())
-	
+
 	email := key.Name
 	v := reflect.ValueOf(src).Elem()
 
 	mc.collection[email] = user.User{
-		Name: v.FieldByName("Name").String(),
+		Name:  v.FieldByName("Name").String(),
 		Email: v.FieldByName("Email").String(),
 	}
 
@@ -104,7 +104,7 @@ func TestCreateUser(t *testing.T) {
 		collection[key] = value
 	}
 	mainCtx.DataStoreClient = MockClient{
-		T: t,
+		T:          t,
 		collection: collection,
 	}
 
@@ -131,11 +131,22 @@ func TestCreateUser(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Equal(t, "error: invalid User data", err.Error())
 	assert.Nil(t, output)
+
+	output, err = user.Create(&mainCtx, &user.User{
+		Name:  `Pedro 1`,
+		Email: `pedro@pedrocelso.com.br1`,
+	})
+
+	assert.NotNil(t, err)
+	assert.Equal(t, "User 'pedro@pedrocelso.com.br1' already exists", err.Error())
+	assert.NotNil(t, output)
+	assert.Equal(t, "Pedro 1", output.Name)
+	assert.Equal(t, "pedro@pedrocelso.com.br1", output.Email)
 }
 
 func TestGetByEmail(t *testing.T) {
 	mainCtx.DataStoreClient = MockClient{
-		T: t,
+		T:          t,
 		collection: usersCollection,
 	}
 
@@ -158,7 +169,7 @@ func TestGetByEmail(t *testing.T) {
 
 func TestGetUsers(t *testing.T) {
 	mainCtx.DataStoreClient = MockClient{
-		T: t,
+		T:          t,
 		collection: usersCollection,
 	}
 	output, err := user.GetUsers(&mainCtx)
@@ -173,7 +184,7 @@ func TestUpdateUser(t *testing.T) {
 		collection[key] = value
 	}
 	mainCtx.DataStoreClient = MockClient{
-		T: t,
+		T:          t,
 		collection: collection,
 	}
 
@@ -198,7 +209,7 @@ func TestDeleteUser(t *testing.T) {
 		collection[key] = value
 	}
 	mainCtx.DataStoreClient = MockClient{
-		T: t,
+		T:          t,
 		collection: collection,
 	}
 

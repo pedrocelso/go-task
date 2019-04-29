@@ -46,8 +46,7 @@ func Create(ctx *authcontext.Context, usr *User) (*User, error) {
 		}
 		return output, nil
 	}
-	glog.Infof("User was previously saved: %v", usr.Email)
-	return output, nil
+	return output, fmt.Errorf(`User '%v' already exists`, usr.Email)
 }
 
 // GetByEmail an user based on its Email
