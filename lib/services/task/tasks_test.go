@@ -124,7 +124,7 @@ func TestCreateTask(t *testing.T) {
 		collection: getMockCollection(),
 	}
 
-	output, err := task.Create(mainCtx, &task.Task{
+	output, err := task.Create(&mainCtx, &task.Task{
 		Name:        `Test`,
 		Description: `Hey, Michael, what you gonna do?`,
 	})
@@ -135,7 +135,7 @@ func TestCreateTask(t *testing.T) {
 	assert.Equal(t, "Test", output.Name)
 	assert.Equal(t, "Hey, Michael, what you gonna do?", output.Description)
 
-	output, err = task.Create(mainCtx, nil)
+	output, err = task.Create(&mainCtx, nil)
 	assert.NotNil(t, err)
 	assert.Equal(t, `error: invalid Task data (Name is required)`, err.Error())
 	assert.Nil(t, output)
@@ -147,13 +147,13 @@ func TestGetById(t *testing.T) {
 		collection: getMockCollection(),
 	}
 
-	output, err := task.GetByID(mainCtx, int64(4))
+	output, err := task.GetByID(&mainCtx, int64(4))
 	assert.Nil(t, err)
 	assert.NotNil(t, output)
 	assert.Equal(t, "Task 4", output.Name)
 	assert.Equal(t, "Description 4", output.Description)
 
-	output, err = task.GetByID(mainCtx, int64(99))
+	output, err = task.GetByID(&mainCtx, int64(99))
 	assert.NotNil(t, err)
 	assert.Equal(t, "Task '99' not found", err.Error())
 	assert.Nil(t, output)
@@ -165,7 +165,7 @@ func TestUpdateTask(t *testing.T) {
 		collection: getMockCollection(),
 	}
 
-	output, err := task.Update(mainCtx, &task.Task{
+	output, err := task.Update(&mainCtx, &task.Task{
 		ID:          int64(4),
 		Name:        `Migeh`,
 		Description: `Description 1`,
@@ -176,13 +176,13 @@ func TestUpdateTask(t *testing.T) {
 	assert.Equal(t, "Migeh", output.Name)
 	assert.Equal(t, "Description 1", output.Description)
 
-	tsk, err := task.GetByID(mainCtx, int64(4))
+	tsk, err := task.GetByID(&mainCtx, int64(4))
 	assert.Nil(t, err)
 	assert.NotNil(t, tsk)
 	assert.Equal(t, "Migeh", tsk.Name)
 	assert.Equal(t, "Description 1", tsk.Description)
 
-	output, err = task.Update(mainCtx, nil)
+	output, err = task.Update(&mainCtx, nil)
 	assert.NotNil(t, err)
 	assert.Equal(t, "error: invalid Task data (Name is required)", err.Error())
 	assert.Nil(t, output)
@@ -194,16 +194,16 @@ func TestDeleteTask(t *testing.T) {
 		collection: getMockCollection(),
 	}
 
-	tsk, err := task.GetByID(mainCtx, int64(4))
+	tsk, err := task.GetByID(&mainCtx, int64(4))
 	assert.Nil(t, err)
 	assert.NotNil(t, tsk)
 	assert.Equal(t, "Task 4", tsk.Name)
 	assert.Equal(t, "Description 4", tsk.Description)
 
-	err = task.Delete(mainCtx, int64(4))
+	err = task.Delete(&mainCtx, int64(4))
 	assert.Nil(t, err)
 
-	tsk, err = task.GetByID(mainCtx, int64(4))
+	tsk, err = task.GetByID(&mainCtx, int64(4))
 	assert.NotNil(t, err)
 	assert.Equal(t, "Task '4' not found", err.Error())
 	assert.Nil(t, tsk)
