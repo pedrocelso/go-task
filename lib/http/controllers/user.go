@@ -52,9 +52,14 @@ func GetUser(c *gin.Context) {
 // GetUsers Fetch all users
 func GetUsers(c *gin.Context) {
 	var err error
+	var ctx *authcontext.Context
 
 	var output []user.User
-	ctx, _ := authcontext.NewAuthContext(c)
+	ctx, err = authcontext.NewAuthContext(c)
+
+	if err != nil {
+		glog.Error(err.Error())
+	}
 
 	if output, err = user.GetUsers(ctx); err == nil {
 		c.JSON(http.StatusOK, output)

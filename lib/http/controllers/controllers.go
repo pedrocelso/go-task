@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/golang/glog"
 
 	"github.com/auth0/go-jwt-middleware"
 	jwt "github.com/dgrijalva/jwt-go"
@@ -40,6 +41,7 @@ func CheckJWT(secret string) gin.HandlerFunc {
 			SigningMethod: jwt.SigningMethodHS256,
 		})
 		if err := jwtMid.CheckJWT(c.Writer, c.Request); err != nil {
+			glog.Error(err.Error())
 			c.AbortWithStatus(401)
 		}
 	}

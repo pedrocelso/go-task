@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"cloud.google.com/go/datastore"
-	"github.com/pedrocelso/go-task/lib/http/authcontext"
 	"github.com/golang/glog"
+	"github.com/pedrocelso/go-task/lib/http/authcontext"
 )
 
 const (
@@ -39,8 +39,10 @@ func Create(ctx *authcontext.Context, task *Task) (*Task, error) {
 		glog.Errorf("ERROR ON TASK ID GENERATION: %v", err.Error())
 		return nil, err
 	}
-	
-	insKey, err := ctx.DataStoreClient.Put(ctx.AppEngineCtx, completeKeys[0], task)	
+
+	task.ID = completeKeys[0].ID
+
+	insKey, err := ctx.DataStoreClient.Put(ctx.AppEngineCtx, completeKeys[0], task)
 	if err != nil {
 		glog.Errorf("ERROR INSERTING TASK: %v", err.Error())
 		return nil, err

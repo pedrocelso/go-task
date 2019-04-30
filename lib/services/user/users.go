@@ -69,7 +69,6 @@ func GetByEmail(ctx *authcontext.Context, email string) (*User, error) {
 
 // GetUsers Fetches all users
 func GetUsers(ctx *authcontext.Context) ([]User, error) {
-	glog.Infof("GETTING ALL USERS FOR %s/%s", ctx.AuthUser.Name, ctx.AuthUser.Email)
 	var output []User
 	q := datastore.NewQuery(index)
 	_, err := ctx.DataStoreClient.GetAll(ctx.AppEngineCtx, q, &output)
