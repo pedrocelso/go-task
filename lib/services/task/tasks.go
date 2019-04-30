@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/pedrocelso/go-rest-service/lib/http/authcontext"
-	"google.golang.org/appengine/datastore"
-	"google.golang.org/appengine/log"
+	"cloud.google.com/go/datastore"
+	"github.com/golang/glog"
+	"github.com/pedrocelso/go-task/lib/http/authcontext"
 )
 
 const (
@@ -23,43 +23,45 @@ type Task struct {
 }
 
 // Create aa task
-func Create(c authcontext.Context, task *Task) (*Task, error) {
+func Create(ctx *authcontext.Context, task *Task) (*Task, error) {
 	var output *Task
+	var keys []*datastore.Key
 	if task == nil {
 		return nil, fmt.Errorf(invalidTaskData)
 	}
 
-	userKey := datastore.NewKey(c.AppEngineCtx, userIndex, c.AuthUser.Email, 0, nil)
-	low, high, err := datastore.AllocateIDs(c.AppEngineCtx, index, userKey, 1)
+	userKey := datastore.NameKey(userIndex, ctx.AuthUser.Email, nil)
+	incompleteKey := datastore.IncompleteKey(index, userKey)
+	keys = append(keys, incompleteKey)
+
+	completeKeys, err := ctx.DataStoreClient.AllocateIDs(ctx.AppEngineCtx, keys)
 	if err != nil {
-		log.Errorf(c.AppEngineCtx, "ERROR ON TASK ID GENERATION", err.Error())
+		glog.Errorf("ERROR ON TASK ID GENERATION: %v", err.Error())
 		return nil, err
 	}
 
-	log.Infof(c.AppEngineCtx, "LOW: %v / HIGH: %v", low, high)
-	task.ID = low
+	task.ID = completeKeys[0].ID
 
-	key := datastore.NewKey(c.AppEngineCtx, index, "", low, userKey)
-	insKey, err := datastore.Put(c.AppEngineCtx, key, task)
+	insKey, err := ctx.DataStoreClient.Put(ctx.AppEngineCtx, completeKeys[0], task)
 	if err != nil {
-		log.Errorf(c.AppEngineCtx, "ERROR INSERTING TASK: %v", err.Error())
+		glog.Errorf("ERROR INSERTING TASK: %v", err.Error())
 		return nil, err
 	}
 
-	output, err = GetByID(c, insKey.IntID())
+	output, err = GetByID(ctx, insKey.ID)
 	if err != nil {
-		log.Errorf(c.AppEngineCtx, "ERROR GETTING TASK OUTPUT: %v", err.Error())
+		glog.Errorf("ERROR GETTING TASK OUTPUT: %v", err.Error())
 		return nil, err
 	}
 	return output, nil
 }
 
 // GetByID a task based on its numeric ID
-func GetByID(c authcontext.Context, id int64) (*Task, error) {
-	userKey := datastore.NewKey(c.AppEngineCtx, userIndex, c.AuthUser.Email, 0, nil)
-	key := datastore.NewKey(c.AppEngineCtx, index, "", id, userKey)
+func GetByID(ctx *authcontext.Context, id int64) (*Task, error) {
+	userKey := datastore.NameKey(userIndex, ctx.AuthUser.Email, nil)
+	key := datastore.IDKey(index, id, userKey)
 	var task Task
-	err := datastore.Get(c.AppEngineCtx, key, &task)
+	err := ctx.DataStoreClient.Get(ctx.AppEngineCtx, key, &task)
 
 	if err != nil {
 		if strings.HasPrefix(err.Error(), `datastore: no such entity`) {
@@ -71,15 +73,14 @@ func GetByID(c authcontext.Context, id int64) (*Task, error) {
 }
 
 // GetTasks Fetches all tasks for the authenticated user
-func GetTasks(c authcontext.Context) ([]Task, error) {
-	log.Debugf(c.AppEngineCtx, "GETTING ALL Tasks FOR %s", c.AuthUser.Email)
+func GetTasks(ctx *authcontext.Context) ([]Task, error) {
 	var output []Task
 	q := datastore.NewQuery(index)
-	completeQuery := q.Ancestor(datastore.NewKey(c.AppEngineCtx, userIndex, c.AuthUser.Email, 0, nil))
-	_, err := completeQuery.GetAll(c.AppEngineCtx, &output)
+	completeQuery := q.Ancestor(datastore.NameKey(userIndex, ctx.AuthUser.Email, nil))
+	_, err := ctx.DataStoreClient.GetAll(ctx.AppEngineCtx, completeQuery, &output)
 
 	if err != nil {
-		log.Errorf(c.AppEngineCtx, "error fetching all tasks for %s", c.AuthUser.Email)
+		glog.Errorf("error fetching all tasks for %s", ctx.AuthUser.Email)
 		return nil, err
 	}
 
@@ -90,25 +91,25 @@ func GetTasks(c authcontext.Context) ([]Task, error) {
 }
 
 // Update task data
-func Update(c authcontext.Context, tsk *Task) (*Task, error) {
+func Update(ctx *authcontext.Context, tsk *Task) (*Task, error) {
 	if tsk == nil || (tsk.Name == `` && tsk.Description == ``) {
 		return nil, fmt.Errorf(invalidTaskData)
 	}
 
-	output, _ := GetByID(c, tsk.ID)
+	output, _ := GetByID(ctx, tsk.ID)
 	if output != nil {
-		userKey := datastore.NewKey(c.AppEngineCtx, userIndex, c.AuthUser.Email, 0, nil)
-		key := datastore.NewKey(c.AppEngineCtx, index, "", tsk.ID, userKey)
-		_, err := datastore.Put(c.AppEngineCtx, key, tsk)
+		userKey := datastore.NameKey(userIndex, ctx.AuthUser.Email, nil)
+		key := datastore.IDKey(index, tsk.ID, userKey)
+		_, err := ctx.DataStoreClient.Put(ctx.AppEngineCtx, key, tsk)
 
 		if err != nil {
-			log.Errorf(c.AppEngineCtx, "ERROR UPDATING TASK: %v", err.Error())
+			glog.Errorf("ERROR UPDATING TASK: %v", err.Error())
 			return nil, err
 		}
 
-		output, err = GetByID(c, tsk.ID)
+		output, err = GetByID(ctx, tsk.ID)
 		if err != nil {
-			log.Errorf(c.AppEngineCtx, "ERROR GETTING TASK OUTPUT: %v", err.Error())
+			glog.Errorf("ERROR GETTING TASK OUTPUT: %v", err.Error())
 			return nil, err
 		}
 		return output, nil
@@ -117,21 +118,21 @@ func Update(c authcontext.Context, tsk *Task) (*Task, error) {
 }
 
 // Delete a task based on its id.
-func Delete(c authcontext.Context, taskID int64) error {
+func Delete(ctx *authcontext.Context, taskID int64) error {
 	var output *Task
-	output, _ = GetByID(c, taskID)
+	output, _ = GetByID(ctx, taskID)
 
 	if output != nil {
-		log.Infof(c.AppEngineCtx, "Deleting task: %v for %v", taskID, c.AuthUser.Email)
-		userKey := datastore.NewKey(c.AppEngineCtx, userIndex, c.AuthUser.Email, 0, nil)
-		key := datastore.NewKey(c.AppEngineCtx, index, "", taskID, userKey)
-		err := datastore.Delete(c.AppEngineCtx, key)
+		glog.Infof("Deleting task: %v for %v", taskID, ctx.AuthUser.Email)
+		userKey := datastore.NameKey(userIndex, ctx.AuthUser.Email, nil)
+		key := datastore.IDKey(index, taskID, userKey)
+		err := ctx.DataStoreClient.Delete(ctx.AppEngineCtx, key)
 
 		if err != nil {
-			log.Errorf(c.AppEngineCtx, "ERROR DELETING TASK: %v", err.Error())
+			glog.Errorf("ERROR DELETING TASK: %v", err.Error())
 			return err
 		}
 		return nil
 	}
-	return fmt.Errorf("task '%v' don't exist on the database for %v", taskID, c.AuthUser.Email)
+	return fmt.Errorf("task '%v' don't exist on the database for %v", taskID, ctx.AuthUser.Email)
 }

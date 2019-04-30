@@ -1,8 +1,7 @@
 service: api
-runtime: go
-api_version: go1.9
+runtime: go111
 handlers:
 - url: /.*
-  script: _go_app
+  script: auto
 env_variables:
   JWT_SECRET: 'exevo gran mas vis'

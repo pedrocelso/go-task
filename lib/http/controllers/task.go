@@ -1,24 +1,29 @@
 package controllers
 
 import (
+	"github.com/golang/glog"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/pedrocelso/go-rest-service/lib/http/authcontext"
-	"github.com/pedrocelso/go-rest-service/lib/services/task"
+	"github.com/pedrocelso/go-task/lib/http/authcontext"
+	"github.com/pedrocelso/go-task/lib/services/task"
 	"google.golang.org/appengine/log"
 )
 
 // CreateTask creates a task
 func CreateTask(c *gin.Context) {
-	var mewTask *task.Task
+	var newTask *task.Task
 	var err error
 	var output *task.Task
-	ctx := authcontext.NewAuthContext(c)
+	ctx, _ := authcontext.NewAuthContext(c)
 
-	if err = c.BindJSON(&mewTask); err == nil {
-		if output, err = task.Create(ctx, mewTask); err == nil {
+	if err != nil {
+		glog.Errorf("ERROR: %v", err.Error())
+	}
+
+	if err = c.BindJSON(&newTask); err == nil {
+		if output, err = task.Create(ctx, newTask); err == nil {
 			c.JSON(http.StatusOK, ResponseObject{"task": output})
 		}
 	}
@@ -35,7 +40,7 @@ func GetTask(c *gin.Context) {
 	var output *task.Task
 	var taskID int64
 	taskID, err = strconv.ParseInt(c.Param("taskId"), 10, 64)
-	ctx := authcontext.NewAuthContext(c)
+	ctx, _ := authcontext.NewAuthContext(c)
 
 	if output, err = task.GetByID(ctx, taskID); err == nil {
 		c.JSON(http.StatusOK, output)
@@ -50,8 +55,9 @@ func GetTasks(c *gin.Context) {
 	var err error
 
 	var output []task.Task
+	ctx, _ := authcontext.NewAuthContext(c)
 
-	if output, err = task.GetTasks(authcontext.NewAuthContext(c)); err == nil {
+	if output, err = task.GetTasks(ctx); err == nil {
 		c.JSON(http.StatusOK, output)
 	}
 
@@ -66,7 +72,7 @@ func UpdateTask(c *gin.Context) {
 	var output *task.Task
 	var tsk task.Task
 
-	ctx := authcontext.NewAuthContext(c)
+	ctx, _ := authcontext.NewAuthContext(c)
 
 	if err = c.BindJSON(&tsk); err == nil {
 		var taskID int64
@@ -92,7 +98,7 @@ func UpdateTask(c *gin.Context) {
 func DeleteTask(c *gin.Context) {
 	var err error
 	var taskID int64
-	ctx := authcontext.NewAuthContext(c)
+	ctx, _ := authcontext.NewAuthContext(c)
 	taskID, err = strconv.ParseInt(c.Param("taskId"), 10, 64)
 	if err != nil {
 		log.Errorf(ctx.AppEngineCtx, "ERROR: %v", err.Error())
