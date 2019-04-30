@@ -1,32 +1,129 @@
 package task_test
 
 import (
+	"fmt"
+	"reflect"
+	"github.com/davecgh/go-spew/spew"
+	"cloud.google.com/go/datastore"
+	"context"
 	"os"
 	"testing"
 
 	"github.com/pedrocelso/go-task/lib/http/authcontext"
 	"github.com/pedrocelso/go-task/lib/services/task"
 	"github.com/stretchr/testify/assert"
-
-	"fmt"
-
-	"cloud.google.com/go/datastore"
 )
 
 var mainCtx authcontext.Context
 
+var taskCollection = map[string]map[int64]task.Task{
+	`1@gmail.com`: {
+		1: task.Task{
+			ID: 0,
+			Name:        `Old Task`,
+			Description: `Plain Old Task`,
+		},
+		4: task.Task{
+			ID: 0,
+			Name:        `Task 4`,
+			Description: `Description 4`,
+		},
+	},
+}
+
+func getMockCollection () map[string]map[int64]task.Task {
+	tasks := make(map[int64]task.Task)
+	collection := make(map[string]map[int64]task.Task)
+	for key, value := range taskCollection[`1@gmail.com`] {
+		tasks[key] = value		
+	}
+
+	collection[`1@gmail.com`] = tasks
+	return collection
+}
+
+type MockClient struct {
+	T          *testing.T
+	collection map[string]map[int64]task.Task
+}
+
+func (mc MockClient) Delete(ctx context.Context, key *datastore.Key) error {
+	email := key.Parent.Name
+
+	if _, ok := mc.collection[email][key.ID]; ok {
+		delete(mc.collection[email], key.ID)
+	} else {
+		return fmt.Errorf(`datastore: no such entity '%v'`, email)
+	}
+	return nil
+}
+
+func (mc MockClient) Get(ctx context.Context, key *datastore.Key, dst interface{}) (err error) {
+	v := reflect.ValueOf(dst).Elem()
+	email := key.Parent.Name
+
+	if val, ok := mc.collection[email][key.ID]; ok {
+		v.FieldByName("ID").SetInt(val.ID)
+		v.FieldByName("Name").SetString(val.Name)
+		v.FieldByName("Description").SetString(val.Description)
+	} else {
+		return fmt.Errorf(`datastore: no such entity '%v'`, email)
+	}
+
+	return nil
+}
+
+func (mc MockClient) GetAll(ctx context.Context, q *datastore.Query, dst interface{}) (keys []*datastore.Key, err error) {
+	// v := reflect.ValueOf(dst).Elem()
+	// var users []user.User
+
+	// for _, v := range mc.collection {
+	// 	users = append(users, v)
+	// }
+
+	// v.Set(reflect.ValueOf(users))
+
+	return nil, nil
+}
+
+func (mc MockClient) Put(ctx context.Context, key *datastore.Key, src interface{}) (*datastore.Key, error) {
+	assert.Equal(mc.T, `*task.Task`, reflect.TypeOf(src).String())
+
+	email := key.Parent.Name
+	spew.Dump(email)
+	v := reflect.ValueOf(src).Elem()
+
+	mc.collection[email][key.ID] = task.Task{
+		ID: key.ID,
+		Name:  v.FieldByName("Name").String(),
+		Description: v.FieldByName("Description").String(),
+	}
+
+	return key, nil
+}
+
+func (mc MockClient) AllocateIDs(ctx context.Context, keys []*datastore.Key) ([]*datastore.Key, error) {
+	for key, _ := range keys {
+		keys[key].ID = int64(key+1)
+	}
+
+	return keys, nil
+}
+
 func TestMain(m *testing.M) {
-	ctx, done, _ := aetest.NewContext()
-	mainCtx.AppEngineCtx = ctx
+	mainCtx.AppEngineCtx = context.Background()
 	mainCtx.AuthUser = authcontext.AuthUser{
 		Name:  `Pedro`,
 		Email: `1@gmail.com`,
 	}
 	os.Exit(m.Run())
-	done()
 }
-
 func TestCreateTask(t *testing.T) {
+	mainCtx.DataStoreClient = MockClient{
+		T:          t,
+		collection: getMockCollection(),
+	}
+
 	output, err := task.Create(mainCtx, &task.Task{
 		Name:        `Test`,
 		Description: `Hey, Michael, what you gonna do?`,
@@ -45,16 +142,16 @@ func TestCreateTask(t *testing.T) {
 }
 
 func TestGetById(t *testing.T) {
-	err := createTasks(mainCtx)
-	if err != nil {
-		t.Fatal(err)
+	mainCtx.DataStoreClient = MockClient{
+		T:          t,
+		collection: getMockCollection(),
 	}
 
 	output, err := task.GetByID(mainCtx, int64(4))
 	assert.Nil(t, err)
 	assert.NotNil(t, output)
 	assert.Equal(t, "Task 4", output.Name)
-	assert.Equal(t, "description 4", output.Description)
+	assert.Equal(t, "Description 4", output.Description)
 
 	output, err = task.GetByID(mainCtx, int64(99))
 	assert.NotNil(t, err)
@@ -62,27 +159,11 @@ func TestGetById(t *testing.T) {
 	assert.Nil(t, output)
 }
 
-// // This test run on a different context ot ensure that only
-// // the created users will be saved on the datastore
-// func TestGetUsers(t *testing.T) {
-// 	mainCtx.AuthUser.Email = `2@gmail.com`
-// 	err := createTasks(mainCtx)
-// 	if err != nil {
-// 		mainCtx.AuthUser.Email = `1@gmail.com`
-// 		t.Fatal(err)
-// 	}
-// 	// This sleep is needed because it take some milliseconds for the objects
-// 	// created on `createUsers` to be indexed and returned on query
-// 	time.Sleep(time.Millisecond * 5e2)
-// 	output, err := task.GetTasks(mainCtx)
-// 	mainCtx.AuthUser.Email = `1@gmail.com`
-// 	assert.Nil(t, err)
-// 	assert.NotNil(t, output)
-// 	assert.Equal(t, 5, len(output))
-// }
-
-func TestUpdateUser(t *testing.T) {
-	err := createTasks(mainCtx)
+func TestUpdateTask(t *testing.T) {
+	mainCtx.DataStoreClient = MockClient{
+		T:          t,
+		collection: getMockCollection(),
+	}
 
 	output, err := task.Update(mainCtx, &task.Task{
 		ID:          int64(4),
@@ -108,13 +189,16 @@ func TestUpdateUser(t *testing.T) {
 }
 
 func TestDeleteTask(t *testing.T) {
-	err := createTasks(mainCtx)
+	mainCtx.DataStoreClient = MockClient{
+		T:          t,
+		collection: getMockCollection(),
+	}
 
 	tsk, err := task.GetByID(mainCtx, int64(4))
 	assert.Nil(t, err)
 	assert.NotNil(t, tsk)
 	assert.Equal(t, "Task 4", tsk.Name)
-	assert.Equal(t, "description 4", tsk.Description)
+	assert.Equal(t, "Description 4", tsk.Description)
 
 	err = task.Delete(mainCtx, int64(4))
 	assert.Nil(t, err)
@@ -123,23 +207,4 @@ func TestDeleteTask(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Equal(t, "Task '4' not found", err.Error())
 	assert.Nil(t, tsk)
-}
-
-func createTasks(ctx authcontext.Context) error {
-	var userKey *datastore.Key
-	userKey = datastore.NewKey(ctx.AppEngineCtx, `User`, ctx.AuthUser.Email, 0, nil)
-	for i := 0; i < 5; i++ {
-		name := fmt.Sprintf(`Task %v`, i)
-		description := fmt.Sprintf(`description %v`, i)
-
-		key := datastore.NewKey(ctx.AppEngineCtx, `Task`, "", int64(i), userKey)
-		if _, err := datastore.Put(ctx.AppEngineCtx, key, &task.Task{
-			ID:          int64(i),
-			Name:        name,
-			Description: description,
-		}); err != nil {
-			return err
-		}
-	}
-	return nil
 }

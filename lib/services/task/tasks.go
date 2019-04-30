@@ -23,7 +23,7 @@ type Task struct {
 }
 
 // Create aa task
-func Create(ctx authcontext.Context, task *Task) (*Task, error) {
+func Create(ctx *authcontext.Context, task *Task) (*Task, error) {
 	var output *Task
 	var keys []*datastore.Key
 	if task == nil {
@@ -39,7 +39,6 @@ func Create(ctx authcontext.Context, task *Task) (*Task, error) {
 		glog.Errorf("ERROR ON TASK ID GENERATION: %v", err.Error())
 		return nil, err
 	}
-
 	
 	insKey, err := ctx.DataStoreClient.Put(ctx.AppEngineCtx, completeKeys[0], task)	
 	if err != nil {
@@ -56,7 +55,7 @@ func Create(ctx authcontext.Context, task *Task) (*Task, error) {
 }
 
 // GetByID a task based on its numeric ID
-func GetByID(ctx authcontext.Context, id int64) (*Task, error) {
+func GetByID(ctx *authcontext.Context, id int64) (*Task, error) {
 	userKey := datastore.NameKey(userIndex, ctx.AuthUser.Email, nil)
 	key := datastore.IDKey(index, id, userKey)
 	var task Task
@@ -72,7 +71,7 @@ func GetByID(ctx authcontext.Context, id int64) (*Task, error) {
 }
 
 // GetTasks Fetches all tasks for the authenticated user
-func GetTasks(ctx authcontext.Context) ([]Task, error) {
+func GetTasks(ctx *authcontext.Context) ([]Task, error) {
 	var output []Task
 	q := datastore.NewQuery(index)
 	completeQuery := q.Ancestor(datastore.NameKey(userIndex, ctx.AuthUser.Email, nil))
@@ -90,7 +89,7 @@ func GetTasks(ctx authcontext.Context) ([]Task, error) {
 }
 
 // Update task data
-func Update(ctx authcontext.Context, tsk *Task) (*Task, error) {
+func Update(ctx *authcontext.Context, tsk *Task) (*Task, error) {
 	if tsk == nil || (tsk.Name == `` && tsk.Description == ``) {
 		return nil, fmt.Errorf(invalidTaskData)
 	}
@@ -117,7 +116,7 @@ func Update(ctx authcontext.Context, tsk *Task) (*Task, error) {
 }
 
 // Delete a task based on its id.
-func Delete(ctx authcontext.Context, taskID int64) error {
+func Delete(ctx *authcontext.Context, taskID int64) error {
 	var output *Task
 	output, _ = GetByID(ctx, taskID)
 

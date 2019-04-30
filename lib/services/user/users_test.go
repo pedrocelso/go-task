@@ -18,7 +18,6 @@ import (
 const email = `pedro@pedrocelso.com.br`
 
 var mainCtx authcontext.Context
-var c context.Context
 
 var usersCollection = map[string]user.User{
 	`pedro@pedrocelso.com.br1`: user.User{
@@ -92,9 +91,12 @@ func (mc MockClient) Put(ctx context.Context, key *datastore.Key, src interface{
 	return nil, nil
 }
 
+func (mc MockClient) AllocateIDs(ctx context.Context, keys []*datastore.Key) ([]*datastore.Key, error) {
+	return nil, nil
+}
+
 func TestMain(m *testing.M) {
-	c := context.Background()
-	mainCtx.AppEngineCtx = c
+	mainCtx.AppEngineCtx = context.Background()
 	os.Exit(m.Run())
 }
 
