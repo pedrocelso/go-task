@@ -3,6 +3,7 @@ package task
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"cloud.google.com/go/datastore"
 	"github.com/golang/glog"
@@ -17,9 +18,15 @@ const (
 
 // Task defines task attributes
 type Task struct {
-	ID          int64  `json:"id"`
-	Name        string `json:"name" binding:"required"`
-	Description string `json:"description" binding:"required"`
+	ID           int64  `json:"id"`
+	Name         string `json:"name" binding:"required"`
+	Description  string `json:"description" binding:"required"`
+	CreationTime int64  `json:"creationTime"`
+	UpdateTime   int64  `json:"updateTime"`
+}
+
+func makeTimestamp() int64 {
+	return time.Now().UnixNano() / int64(time.Millisecond)
 }
 
 // Create aa task
@@ -41,6 +48,7 @@ func Create(ctx *authcontext.Context, task *Task) (*Task, error) {
 	}
 
 	task.ID = completeKeys[0].ID
+	task.CreationTime = makeTimestamp()
 
 	insKey, err := ctx.DataStoreClient.Put(ctx.AppEngineCtx, completeKeys[0], task)
 	if err != nil {
@@ -100,6 +108,7 @@ func Update(ctx *authcontext.Context, tsk *Task) (*Task, error) {
 	if output != nil {
 		userKey := datastore.NameKey(userIndex, ctx.AuthUser.Email, nil)
 		key := datastore.IDKey(index, tsk.ID, userKey)
+		tsk.UpdateTime = makeTimestamp()
 		_, err := ctx.DataStoreClient.Put(ctx.AppEngineCtx, key, tsk)
 
 		if err != nil {
