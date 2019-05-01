@@ -1,13 +1,14 @@
 package task_test
 
 import (
-	"fmt"
-	"reflect"
-	"github.com/davecgh/go-spew/spew"
-	"cloud.google.com/go/datastore"
 	"context"
+	"fmt"
 	"os"
+	"reflect"
 	"testing"
+
+	"cloud.google.com/go/datastore"
+	"github.com/davecgh/go-spew/spew"
 
 	"github.com/pedrocelso/go-task/lib/http/authcontext"
 	"github.com/pedrocelso/go-task/lib/services/task"
@@ -19,23 +20,23 @@ var mainCtx authcontext.Context
 var taskCollection = map[string]map[int64]task.Task{
 	`1@gmail.com`: {
 		1: task.Task{
-			ID: 0,
+			ID:          0,
 			Name:        `Old Task`,
 			Description: `Plain Old Task`,
 		},
 		4: task.Task{
-			ID: 0,
+			ID:          4,
 			Name:        `Task 4`,
 			Description: `Description 4`,
 		},
 	},
 }
 
-func getMockCollection () map[string]map[int64]task.Task {
+func getMockCollection() map[string]map[int64]task.Task {
 	tasks := make(map[int64]task.Task)
 	collection := make(map[string]map[int64]task.Task)
 	for key, value := range taskCollection[`1@gmail.com`] {
-		tasks[key] = value		
+		tasks[key] = value
 	}
 
 	collection[`1@gmail.com`] = tasks
@@ -74,14 +75,14 @@ func (mc MockClient) Get(ctx context.Context, key *datastore.Key, dst interface{
 }
 
 func (mc MockClient) GetAll(ctx context.Context, q *datastore.Query, dst interface{}) (keys []*datastore.Key, err error) {
-	// v := reflect.ValueOf(dst).Elem()
-	// var users []user.User
+	v := reflect.ValueOf(dst).Elem()
+	var tasks []task.Task
 
-	// for _, v := range mc.collection {
-	// 	users = append(users, v)
-	// }
+	for _, v := range mc.collection[`1@gmail.com`] {
+		tasks = append(tasks, v)
+	}
 
-	// v.Set(reflect.ValueOf(users))
+	v.Set(reflect.ValueOf(tasks))
 
 	return nil, nil
 }
@@ -94,8 +95,8 @@ func (mc MockClient) Put(ctx context.Context, key *datastore.Key, src interface{
 	v := reflect.ValueOf(src).Elem()
 
 	mc.collection[email][key.ID] = task.Task{
-		ID: key.ID,
-		Name:  v.FieldByName("Name").String(),
+		ID:          key.ID,
+		Name:        v.FieldByName("Name").String(),
 		Description: v.FieldByName("Description").String(),
 	}
 
@@ -104,7 +105,7 @@ func (mc MockClient) Put(ctx context.Context, key *datastore.Key, src interface{
 
 func (mc MockClient) AllocateIDs(ctx context.Context, keys []*datastore.Key) ([]*datastore.Key, error) {
 	for key, _ := range keys {
-		keys[key].ID = int64(key+1)
+		keys[key].ID = int64(key + 1)
 	}
 
 	return keys, nil
@@ -159,6 +160,18 @@ func TestGetById(t *testing.T) {
 	assert.Nil(t, output)
 }
 
+func TestGetTasks(t *testing.T) {
+	mainCtx.DataStoreClient = MockClient{
+		T:          t,
+		collection: getMockCollection(),
+	}
+
+	output, err := task.GetTasks(&mainCtx)
+	assert.Nil(t, err)
+	assert.NotNil(t, output)
+	assert.Equal(t, 2, len(output))
+}
+
 func TestUpdateTask(t *testing.T) {
 	mainCtx.DataStoreClient = MockClient{
 		T:          t,
@@ -207,4 +220,8 @@ func TestDeleteTask(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Equal(t, "Task '4' not found", err.Error())
 	assert.Nil(t, tsk)
+
+	err = task.Delete(&mainCtx, int64(10))
+	assert.NotNil(t, err)
+	assert.Equal(t, "task '10' don't exist on the database for 1@gmail.com", err.Error())
 }
