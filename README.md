@@ -26,5 +26,6 @@ https://cloud.google.com/free/docs/always-free-usage-limits
 ### Local Unit Testing for Go
 https://cloud.google.com/appengine/docs/standard/go/tools/localunittesting/
 
-### AppEngine Test Package (aetest)
-https://cloud.google.com/appengine/docs/standard/go/tools/localunittesting/reference
+### ~~AppEngine Test Package (aetest)~~
+~~https://cloud.google.com/appengine/docs/standard/go/tools/localunittesting/reference~~
+aetest is no longer needed, with the go111 runtime, it is now possible to write GO on a more idiomatic way. Now there's an interface that is implemented by Google Datastore and is easily mocked.
