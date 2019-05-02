@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"cloud.google.com/go/datastore"
-	"github.com/davecgh/go-spew/spew"
 
 	"github.com/pedrocelso/go-task/lib/http/authcontext"
 	"github.com/pedrocelso/go-task/lib/services/task"
@@ -91,7 +90,6 @@ func (mc MockClient) Put(ctx context.Context, key *datastore.Key, src interface{
 	assert.Equal(mc.T, `*task.Task`, reflect.TypeOf(src).String())
 
 	email := key.Parent.Name
-	spew.Dump(email)
 	v := reflect.ValueOf(src).Elem()
 
 	mc.collection[email][key.ID] = task.Task{

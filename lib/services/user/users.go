@@ -16,7 +16,8 @@ import (
 const (
 	index           = `User`
 	invalidUserData = `error: invalid User data`
-	pepper          = `AAUIAbhABJb*&!^^@$%^6756nVBZZVBvnGHVAjhM<PE($#^$&())NnwpiwnOW?"|">?UwoUWBK`
+	// Pepper for user authentication
+	Pepper          = `AAUIAbhABJb*&!^^@$%^6756nVBZZVBvnGHVAjhM<PE($#^$&())NnwpiwnOW?"|">?UwoUWBK`
 )
 
 // Basic defines basic user attributes
@@ -47,7 +48,7 @@ func Create(ctx *authcontext.Context, usr *Full) (*Basic, error) {
 	output, _ := GetByEmail(ctx, usr.Email)
 
 	if output == nil {
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(fmt.Sprintf("%s%s", usr.Password, pepper)), bcrypt.DefaultCost)
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(fmt.Sprintf("%s%s", usr.Password, Pepper)), bcrypt.DefaultCost)
 
 		if err != nil {
 			return nil, err

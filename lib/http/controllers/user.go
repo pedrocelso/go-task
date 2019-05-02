@@ -1,11 +1,10 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"time"
-
-	"github.com/davecgh/go-spew/spew"
 
 	"golang.org/x/crypto/bcrypt"
 
@@ -48,12 +47,10 @@ func CreateUser(c *gin.Context) {
 
 // GetUser based on its email
 func GetUser(c *gin.Context) {
-	spew.Dump(c)
 	var err error
 	var output *user.Basic
 	usrEmail := c.Param("userEmail")
 	ctx, _ := authcontext.NewAuthContext(c)
-	spew.Dump(ctx)
 
 	if output, err = user.GetByEmail(ctx, usrEmail); err == nil {
 		c.JSON(http.StatusOK, output)
@@ -133,7 +130,7 @@ func AuthenticateUser(c *gin.Context) {
 
 	if err = c.BindJSON(&usr); err == nil {
 		if output, err = user.GetFullByEmail(ctx, usr.Email); err == nil {
-			if err = bcrypt.CompareHashAndPassword([]byte(output.Password), []byte(usr.Password)); err == nil {
+			if err = bcrypt.CompareHashAndPassword([]byte(output.Password), []byte(fmt.Sprintf("%s%s", usr.Password, user.Pepper))); err == nil {
 				expirationTime := time.Now().Add(5 * time.Minute)
 				token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims{
 					Name:  usr.Name,
@@ -142,7 +139,7 @@ func AuthenticateUser(c *gin.Context) {
 						ExpiresAt: expirationTime.Unix(),
 					},
 				})
-				if tokenString, err = token.SignedString(os.Getenv("JWT_SECRET")); err == nil {
+				if tokenString, err = token.SignedString([]byte(os.Getenv("JWT_SECRET"))); err == nil {
 					c.JSON(http.StatusOK, ResponseObject{"token": tokenString})
 				}
 			}
