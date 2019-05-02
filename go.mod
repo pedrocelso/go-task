@@ -20,6 +20,7 @@ require (
 	github.com/ugorji/go v1.1.4 // indirect
 	go.chromium.org/gae v0.0.0-20190225082608-abcc82041b0d
 	go.chromium.org/luci v0.0.0-20190425024242-bb3e540ed271 // indirect
+	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
 	golang.org/x/sync v0.0.0-20190412183630-56d357773e84 // indirect
 	google.golang.org/api v0.3.1
 	google.golang.org/appengine v1.5.0
