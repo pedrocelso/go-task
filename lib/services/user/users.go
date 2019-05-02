@@ -2,6 +2,9 @@ package user
 
 import (
 	"fmt"
+	"time"
+
+	"golang.org/x/crypto/bcrypt"
 
 	"strings"
 
@@ -13,26 +16,49 @@ import (
 const (
 	index           = `User`
 	invalidUserData = `error: invalid User data`
+	// Pepper for user authentication
+	Pepper          = `AAUIAbhABJb*&!^^@$%^6756nVBZZVBvnGHVAjhM<PE($#^$&())NnwpiwnOW?"|">?UwoUWBK`
 )
 
-// User defines user attributes
-type User struct {
+// Basic defines basic user attributes
+type Basic struct {
 	Name  string `json:"name"`
 	Email string `json:"email"`
 }
 
+// Full defines full user attributes
+type Full struct {
+	Name         string `json:"name" binding:"required"`
+	Email        string `json:"email" binding:"required"`
+	Password     string `json:"password"`
+	CreationTime int64  `json:"creationTime"`
+	UpdateTime   int64  `json:"updateTime"`
+}
+
+func makeTimestamp() int64 {
+	return time.Now().UnixNano() / int64(time.Millisecond)
+}
+
 // Create an user
-func Create(ctx *authcontext.Context, usr *User) (*User, error) {
-	var output *User
+func Create(ctx *authcontext.Context, usr *Full) (*Basic, error) {
 	if usr == nil || usr.Email == `` {
 		return nil, fmt.Errorf(invalidUserData)
 	}
 
-	output, _ = GetByEmail(ctx, usr.Email)
+	output, _ := GetByEmail(ctx, usr.Email)
 
 	if output == nil {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(fmt.Sprintf("%s%s", usr.Password, Pepper)), bcrypt.DefaultCost)
+
+		if err != nil {
+			return nil, err
+		}
+
+		usr.Password = string(hashedPassword)
+		usr.CreationTime = makeTimestamp()
+
 		key := datastore.NameKey(index, usr.Email, nil)
-		_, err := ctx.DataStoreClient.Put(ctx.AppEngineCtx, key, usr)
+		_, err = ctx.DataStoreClient.Put(ctx.AppEngineCtx, key, usr)
 
 		if err != nil {
 			glog.Errorf("ERROR INSERTING USER: %v", err.Error())
@@ -50,12 +76,28 @@ func Create(ctx *authcontext.Context, usr *User) (*User, error) {
 }
 
 // GetByEmail an user based on its Email
-func GetByEmail(ctx *authcontext.Context, email string) (*User, error) {
+func GetByEmail(ctx *authcontext.Context, email string) (*Basic, error) {
+	var usr Basic
+
+	usrFull, err := GetFullByEmail(ctx, email)
+
+	if err != nil {
+		return nil, err
+	}
+
+	usr.Email = usrFull.Email
+	usr.Name = usrFull.Name
+
+	return &usr, nil
+}
+
+// GetFullByEmail full User info based on its email
+func GetFullByEmail(ctx *authcontext.Context, email string) (*Full, error) {
 	if email == `` {
 		return nil, fmt.Errorf(invalidUserData)
 	}
 	userKey := datastore.NameKey(index, email, nil)
-	var usr User
+	var usr Full
 	err := ctx.DataStoreClient.Get(ctx.AppEngineCtx, userKey, &usr)
 
 	if err != nil {
@@ -68,8 +110,8 @@ func GetByEmail(ctx *authcontext.Context, email string) (*User, error) {
 }
 
 // GetUsers Fetches all users
-func GetUsers(ctx *authcontext.Context) ([]User, error) {
-	var output []User
+func GetUsers(ctx *authcontext.Context) ([]Basic, error) {
+	var output []Basic
 	q := datastore.NewQuery(index)
 	_, err := ctx.DataStoreClient.GetAll(ctx.AppEngineCtx, q, &output)
 
@@ -85,7 +127,7 @@ func GetUsers(ctx *authcontext.Context) ([]User, error) {
 }
 
 // Update user data
-func Update(ctx *authcontext.Context, usr *User) (*User, error) {
+func Update(ctx *authcontext.Context, usr *Full) (*Basic, error) {
 	if usr == nil || usr.Email == `` {
 		return nil, fmt.Errorf(invalidUserData)
 	}
@@ -112,8 +154,7 @@ func Update(ctx *authcontext.Context, usr *User) (*User, error) {
 
 // Delete an user based on its email.
 func Delete(ctx *authcontext.Context, email string) error {
-	var output *User
-	output, _ = GetByEmail(ctx, email)
+	output, _ := GetByEmail(ctx, email)
 
 	if output != nil {
 		glog.Infof("Deleting user: %v", email)

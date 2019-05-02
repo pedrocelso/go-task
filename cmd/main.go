@@ -22,6 +22,7 @@ func main() {
 	users.GET("/", controllers.GetUsers)
 	users.PUT("/:userEmail", controllers.UpdateUser)
 	users.DELETE("/:userEmail", controllers.DeleteUser)
+	users.POST("/signin", controllers.AuthenticateUser)
 
 	tasks := v1.Group("/tasks")
 	tasks.POST("/", controllers.CreateTask)
