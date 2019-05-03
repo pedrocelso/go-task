@@ -131,7 +131,7 @@ func AuthenticateUser(c *gin.Context) {
 	if err = c.BindJSON(&usr); err == nil {
 		if output, err = user.GetFullByEmail(ctx, usr.Email); err == nil {
 			if err = bcrypt.CompareHashAndPassword([]byte(output.Password), []byte(fmt.Sprintf("%s%s", usr.Password, user.Pepper))); err == nil {
-				expirationTime := time.Now().Add(5 * time.Minute)
+				expirationTime := time.Now().Add(2 * time.Hour)
 				token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims{
 					Name:  usr.Name,
 					Email: usr.Email,
