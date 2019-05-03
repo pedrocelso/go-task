@@ -42,13 +42,18 @@ func NewAuthContext(c *gin.Context) (*Context, error) {
 		return nil, err
 	}
 
-	return &Context{
+	context := Context{
 		AppEngineCtx:    ctx,
 		DataStoreClient: client,
 		GinCtx:          c,
-		AuthUser: AuthUser{
+	}
+
+	if authUser != nil {
+		context.AuthUser = AuthUser{
 			Name:  authUser.(*jwt.Token).Claims.(jwt.MapClaims)["name"].(string),
 			Email: authUser.(*jwt.Token).Claims.(jwt.MapClaims)["email"].(string),
-		},
-	}, nil
+		}
+	}
+
+	return &context, nil
 }
