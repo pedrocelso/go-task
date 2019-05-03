@@ -31,6 +31,7 @@ type Full struct {
 	Name         string `json:"name" binding:"required"`
 	Email        string `json:"email" binding:"required"`
 	Password     string `json:"password"`
+	Role         int    `json:"role"`
 	CreationTime int64  `json:"creationTime"`
 	UpdateTime   int64  `json:"updateTime"`
 }
@@ -56,6 +57,7 @@ func Create(ctx *authcontext.Context, usr *Full) (*Basic, error) {
 
 		usr.Password = string(hashedPassword)
 		usr.CreationTime = makeTimestamp()
+		usr.Role = 0
 
 		key := datastore.NameKey(index, usr.Email, nil)
 		_, err = ctx.DataStoreClient.Put(ctx.AppEngineCtx, key, usr)
@@ -111,18 +113,27 @@ func GetFullByEmail(ctx *authcontext.Context, email string) (*Full, error) {
 
 // GetUsers Fetches all users
 func GetUsers(ctx *authcontext.Context) ([]Basic, error) {
+	var fullOutput []Full
 	var output []Basic
 	q := datastore.NewQuery(index)
-	_, err := ctx.DataStoreClient.GetAll(ctx.AppEngineCtx, q, &output)
+	_, err := ctx.DataStoreClient.GetAll(ctx.AppEngineCtx, q, &fullOutput)
 
 	if err != nil {
 		glog.Errorf("error fetching all users")
 		return nil, err
 	}
 
-	if len(output) <= 0 {
+	if len(fullOutput) <= 0 {
 		return nil, fmt.Errorf("no users found")
 	}
+
+	for _, v := range fullOutput {
+		output = append(output, Basic{
+			Name:  v.Name,
+			Email: v.Email,
+		})
+	}
+
 	return output, nil
 }
 

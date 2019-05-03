@@ -79,11 +79,12 @@ func (mc MockClient) Get(ctx context.Context, key *datastore.Key, dst interface{
 }
 
 func (mc MockClient) GetAll(ctx context.Context, q *datastore.Query, dst interface{}) (keys []*datastore.Key, err error) {
+	assert.Equal(mc.T, `*[]user.Full`, reflect.TypeOf(dst).String())
 	v := reflect.ValueOf(dst).Elem()
-	var users []user.Basic
+	var users []user.Full
 
 	for _, v := range mc.collection {
-		users = append(users, user.Basic{
+		users = append(users, user.Full{
 			Name:  v.Name,
 			Email: v.Email,
 		})
