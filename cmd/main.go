@@ -34,6 +34,14 @@ func main() {
 	tasks.PUT("/:taskId", controllers.UpdateTask)
 	tasks.DELETE("/:taskId", controllers.DeleteTask)
 
+	incidents := v1.Group("/task/:taskId/incidents")
+	incidents.Use(controllers.CheckJWT(os.Getenv("JWT_SECRET")))
+	incidents.POST("/", controllers.CreateTask)
+	incidents.GET("/:incidentsId", controllers.GetTask)
+	incidents.GET("/", controllers.GetTasks)
+	incidents.PUT("/:incidentsId", controllers.UpdateTask)
+	incidents.DELETE("/:incidentsId", controllers.DeleteTask)
+
 	router.Run()
 	appengine.Main()
 }
