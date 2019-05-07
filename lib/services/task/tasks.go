@@ -18,13 +18,13 @@ const (
 
 // Task defines task attributes
 type Task struct {
-	ID							int64  `json:"id"`
-	Name						string `json:"name" binding:"required"`
-	Description			string `json:"description" binding:"required" datastore:",noindex"`
-	CreationTime		int64  `json:"creationTime"`
-	UpdateTime			int64  `json:"updateTime"`
-	Active			 		bool	 `json:"active"`
-	IncidentsCount	int64  `json:"incidentsCount"`
+	ID             int64  `json:"id"`
+	Name           string `json:"name" binding:"required"`
+	Description    string `json:"description" binding:"required" datastore:",noindex"`
+	CreationTime   int64  `json:"creationTime"`
+	UpdateTime     int64  `json:"updateTime"`
+	Active         bool   `json:"active"`
+	IncidentsCount int64  `json:"incidentsCount"`
 }
 
 func makeTimestamp() int64 {
