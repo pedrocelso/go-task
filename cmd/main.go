@@ -36,11 +36,11 @@ func main() {
 
 	incidents := v1.Group("/task/:taskId/incidents")
 	incidents.Use(controllers.CheckJWT(os.Getenv("JWT_SECRET")))
-	incidents.POST("/", controllers.CreateTask)
-	incidents.GET("/:incidentsId", controllers.GetTask)
-	incidents.GET("/", controllers.GetTasks)
-	incidents.PUT("/:incidentsId", controllers.UpdateTask)
-	incidents.DELETE("/:incidentsId", controllers.DeleteTask)
+	incidents.POST("/", controllers.CreateIncident)
+	incidents.GET("/:incidentId", controllers.GetIncident)
+	incidents.GET("/", controllers.GetIncidents)
+	incidents.PUT("/:incidentId", controllers.UpdateIncident)
+	incidents.DELETE("/:incidentId", controllers.DeleteIncident)
 
 	router.Run()
 	appengine.Main()

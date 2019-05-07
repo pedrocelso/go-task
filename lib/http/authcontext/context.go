@@ -15,6 +15,7 @@ type PersistenceClient interface {
 	Delete(ctx context.Context, key *datastore.Key) error
 	Get(ctx context.Context, key *datastore.Key, dst interface{}) (err error)
 	GetAll(ctx context.Context, q *datastore.Query, dst interface{}) (keys []*datastore.Key, err error)
+	NewTransaction(ctx context.Context, opts ...datastore.TransactionOption) (t *datastore.Transaction, err error)
 	Put(ctx context.Context, key *datastore.Key, src interface{}) (*datastore.Key, error)
 }
 

@@ -95,6 +95,10 @@ func (mc MockClient) GetAll(ctx context.Context, q *datastore.Query, dst interfa
 	return nil, nil
 }
 
+func (mc MockClient) NewTransaction(ctx context.Context, opts ...datastore.TransactionOption) (t *datastore.Transaction, err error) {
+	return nil, nil
+}
+
 func (mc MockClient) Put(ctx context.Context, key *datastore.Key, src interface{}) (*datastore.Key, error) {
 	assert.Equal(mc.T, `*user.Full`, reflect.TypeOf(src).String())
 
