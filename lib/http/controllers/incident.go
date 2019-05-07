@@ -16,9 +16,9 @@ func CreateIncident(c *gin.Context) {
 	var err error
 	var output *incident.Incident
 	var taskID int64
-	
+
 	ctx, _ := authcontext.NewAuthContext(c)
-	
+
 	if err = c.BindJSON(&newIncident); err == nil {
 		if taskID, err = strconv.ParseInt(c.Param("taskId"), 10, 64); err == nil {
 			if output, err = incident.Create(ctx, taskID, newIncident); err == nil {

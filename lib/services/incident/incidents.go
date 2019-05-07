@@ -12,19 +12,19 @@ import (
 )
 
 const (
-	index           		= `Incident`
+	index               = `Incident`
 	invalidIncidentData = `error: invalid Incident data`
-	taskIndex       		= `Task`
-	userIndex       		= `User`
+	taskIndex           = `Task`
+	userIndex           = `User`
 )
 
 // Incident defines incident attributes
 type Incident struct {
 	ID           int64  `json:"id"`
-	TaskID			 int64	`json:"taskId"`
+	TaskID       int64  `json:"taskId"`
 	Name         string `json:"name" binding:"required"`
 	Description  string `json:"description" binding:"required" datastore:",noindex"`
-	Active			 bool 	`json:"active"`
+	Active       bool   `json:"active"`
 	CreationTime int64  `json:"creationTime"`
 	UpdateTime   int64  `json:"updateTime"`
 }

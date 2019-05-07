@@ -20,19 +20,19 @@ const email = `pedro@pedrocelso.com.br`
 var mainCtx authcontext.Context
 
 var usersCollection = map[string]user.Full{
-	`pedro@pedrocelso.com.br1`: user.Full{
+	`pedro@pedrocelso.com.br1`: {
 		Name:  `Pedro 1`,
 		Email: `pedro@pedrocelso.com.br1`,
 	},
-	`migeh@pedrocelso.com.br`: user.Full{
+	`migeh@pedrocelso.com.br`: {
 		Name:  `Mr. Migeh`,
 		Email: `migeh@pedrocelso.com.br`,
 	},
-	`pedro@pedrocelso.com.br0`: user.Full{
+	`pedro@pedrocelso.com.br0`: {
 		Name:  `Pedro 0`,
 		Email: `pedro@pedrocelso.com.br0`,
 	},
-	`full@pedrocelso.com.br`: user.Full{
+	`full@pedrocelso.com.br`: {
 		Name:         `Pedro Full`,
 		Email:        `full@pedrocelso.com.br`,
 		Password:     `$2a$08$2AH4glNU51oZY0fRMyhc7e/HyCG5.n37mqmuYdJnWiKMBcq1aXNtu`,

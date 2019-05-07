@@ -17,7 +17,7 @@ const (
 	index           = `User`
 	invalidUserData = `error: invalid User data`
 	// Pepper for user authentication
-	Pepper          = `AAUIAbhABJb*&!^^@$%^6756nVBZZVBvnGHVAjhM<PE($#^$&())NnwpiwnOW?"|">?UwoUWBK`
+	Pepper = `AAUIAbhABJb*&!^^@$%^6756nVBZZVBvnGHVAjhM<PE($#^$&())NnwpiwnOW?"|">?UwoUWBK`
 )
 
 // Basic defines basic user attributes

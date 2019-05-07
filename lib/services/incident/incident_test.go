@@ -126,7 +126,7 @@ func (mc MockClient) Put(ctx context.Context, key *datastore.Key, src interface{
 }
 
 func (mc MockClient) AllocateIDs(ctx context.Context, keys []*datastore.Key) ([]*datastore.Key, error) {
-	for key, _ := range keys {
+	for key := range keys {
 		keys[key].ID = int64(key + 1)
 	}
 
@@ -141,6 +141,7 @@ func TestMain(m *testing.M) {
 	}
 	os.Exit(m.Run())
 }
+
 // func TestCreateIncident(t *testing.T) {
 // 	mainCtx.DataStoreClient = MockClient{
 // 		T:          t,
