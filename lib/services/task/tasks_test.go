@@ -19,9 +19,10 @@ var mainCtx authcontext.Context
 var taskCollection = map[string]map[int64]task.Task{
 	`1@gmail.com`: {
 		1: task.Task{
-			ID:          0,
-			Name:        `Old Task`,
-			Description: `Plain Old Task`,
+			ID:             0,
+			Name:           `Old Task`,
+			Description:    `Plain Old Task`,
+			IncidentsCount: 1,
 		},
 		4: task.Task{
 			ID:          4,
@@ -45,6 +46,10 @@ func getMockCollection() map[string]map[int64]task.Task {
 type MockClient struct {
 	T          *testing.T
 	collection map[string]map[int64]task.Task
+}
+
+func (mc MockClient) Count(ctx context.Context, q *datastore.Query) (int, error) {
+	return 1, nil
 }
 
 func (mc MockClient) Delete(ctx context.Context, key *datastore.Key) error {
@@ -172,6 +177,7 @@ func TestGetTasks(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, output)
 	assert.Equal(t, 2, len(output))
+	assert.Equal(t, 1, output[0].PendingIncidentsCount)
 }
 
 func TestUpdateTask(t *testing.T) {

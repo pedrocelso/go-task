@@ -12,6 +12,7 @@ import (
 // PersistenceClient A wrapper aound the datastore client
 type PersistenceClient interface {
 	AllocateIDs(ctx context.Context, keys []*datastore.Key) ([]*datastore.Key, error)
+	Count(ctx context.Context, q *datastore.Query) (n int, err error)
 	Delete(ctx context.Context, key *datastore.Key) error
 	Get(ctx context.Context, key *datastore.Key, dst interface{}) (err error)
 	GetAll(ctx context.Context, q *datastore.Query, dst interface{}) (keys []*datastore.Key, err error)

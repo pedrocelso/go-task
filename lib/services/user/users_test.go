@@ -46,6 +46,10 @@ type MockClient struct {
 	collection map[string]user.Full
 }
 
+func (mc MockClient) Count(ctx context.Context, q *datastore.Query) (n int, err error) {
+	return 1, nil
+}
+
 func (mc MockClient) Delete(ctx context.Context, key *datastore.Key) error {
 	email := key.Name
 

@@ -69,6 +69,10 @@ type MockClient struct {
 	collection map[int64]map[int64]incident.Incident
 }
 
+func (mc MockClient) Count(ctx context.Context, q *datastore.Query) (int, error) {
+	return 1, nil
+}
+
 func (mc MockClient) Delete(ctx context.Context, key *datastore.Key) error {
 	if _, ok := mc.collection[key.ID]; ok {
 		delete(mc.collection, key.ID)

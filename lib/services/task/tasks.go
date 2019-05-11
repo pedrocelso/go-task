@@ -18,13 +18,14 @@ const (
 
 // Task defines task attributes
 type Task struct {
-	ID             int64  `json:"id"`
-	Name           string `json:"name" binding:"required"`
-	Description    string `json:"description" binding:"required" datastore:",noindex"`
-	CreationTime   int64  `json:"creationTime"`
-	UpdateTime     int64  `json:"updateTime"`
-	Active         bool   `json:"active"`
-	IncidentsCount int64  `json:"incidentsCount"`
+	ID                    int64  `json:"id"`
+	Name                  string `json:"name" binding:"required"`
+	Description           string `json:"description" binding:"required" datastore:",noindex"`
+	CreationTime          int64  `json:"creationTime"`
+	UpdateTime            int64  `json:"updateTime"`
+	Active                bool   `json:"active"`
+	IncidentsCount        int64  `json:"incidentsCount"`
+	PendingIncidentsCount int    `json:"pendingIncidentsCount" datastore:"-"`
 }
 
 func makeTimestamp() int64 {
@@ -87,7 +88,8 @@ func GetByID(ctx *authcontext.Context, id int64) (*Task, error) {
 func GetTasks(ctx *authcontext.Context) ([]Task, error) {
 	var output []Task
 	q := datastore.NewQuery(index)
-	completeQuery := q.Ancestor(datastore.NameKey(userIndex, ctx.AuthUser.Email, nil))
+	userKey := datastore.NameKey(userIndex, ctx.AuthUser.Email, nil)
+	completeQuery := q.Ancestor(userKey)
 	_, err := ctx.DataStoreClient.GetAll(ctx.AppEngineCtx, completeQuery, &output)
 
 	if err != nil {
@@ -98,6 +100,21 @@ func GetTasks(ctx *authcontext.Context) ([]Task, error) {
 	if len(output) <= 0 {
 		return nil, fmt.Errorf("no tasks found")
 	}
+
+	for k, v := range output {
+		if v.IncidentsCount > 0 {
+			var count int
+			incidentQuery := datastore.NewQuery(`Incident`).
+				Filter(`TaskID =`, v.ID).
+				Filter(`Status =`, 1)
+			count, err = ctx.DataStoreClient.Count(ctx.AppEngineCtx, incidentQuery)
+			if err != nil {
+				return output, err
+			}
+			output[k].PendingIncidentsCount = count
+		}
+	}
+
 	return output, nil
 }
 
