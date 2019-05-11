@@ -25,6 +25,7 @@ type Incident struct {
 	Name         string `json:"name" binding:"required"`
 	Description  string `json:"description" binding:"required" datastore:",noindex"`
 	Active       bool   `json:"active"`
+	Status       int    `json:"status"`
 	CreationTime int64  `json:"creationTime"`
 	UpdateTime   int64  `json:"updateTime"`
 }
