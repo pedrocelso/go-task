@@ -2,4 +2,5 @@
 .vscode/*
 **/*/debug.test
 c.out
+coverage.txt
 coverage.html
