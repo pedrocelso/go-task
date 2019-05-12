@@ -7,8 +7,8 @@ jobs:
     steps:
       - checkout
       - run: |
-          go test ./... -coverprofile=c.out
-          go tool cover -html=c.out -o coverage.html
+          go test ./... -coverprofile=coverage.txt -covermode=atomic
+          go tool cover -html=coverage.txt -o coverage.html
           mv coverage.html /tmp/artifacts
       - run:
           name: Upload code coverage
