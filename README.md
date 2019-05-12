@@ -1,5 +1,6 @@
 # go-task
 [![CircleCI](https://circleci.com/gh/pedrocelso/go-task/tree/master.svg?style=shield)](https://circleci.com/gh/pedrocelso/go-task/tree/master)
+[![codecov](https://codecov.io/gh/pedrocelso/go-task/branch/master/graph/badge.svg)](https://codecov.io/gh/pedrocelso/go-task)
 
 An basic REST service (tasks) written in GO.
 
