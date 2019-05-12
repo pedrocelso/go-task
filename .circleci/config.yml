@@ -10,6 +10,9 @@ jobs:
           go test ./... -coverprofile=c.out
           go tool cover -html=c.out -o coverage.html
           mv coverage.html /tmp/artifacts
+      - run:
+          name: Upload code coverage
+          command: bash <(curl -s https://codecov.io/bash) || echo 'Codecov failed to upload'
       - store_artifacts:
           path: /tmp/artifacts
 
