@@ -32,6 +32,20 @@ func makeTimestamp() int64 {
 	return time.Now().UnixNano() / int64(time.Millisecond)
 }
 
+func (t Task) getIncidentCount(ctx *authcontext.Context, status int, c chan int) {
+	if t.IncidentsCount == 0 {
+		c <- 0
+	}
+	incidentQuery := datastore.NewQuery(`Incident`).
+		Filter(`TaskID =`, t.ID).
+		Filter(`Status =`, status)
+	count, err := ctx.DataStoreClient.Count(ctx.AppEngineCtx, incidentQuery)
+	if err != nil {
+		c <- 0
+	}
+	c <- count
+}
+
 // Create aa task
 func Create(ctx *authcontext.Context, task *Task) (*Task, error) {
 	var output *Task
@@ -86,6 +100,7 @@ func GetByID(ctx *authcontext.Context, id int64) (*Task, error) {
 
 // GetTasks Fetches all tasks for the authenticated user
 func GetTasks(ctx *authcontext.Context) ([]Task, error) {
+	start := time.Now()
 	var output []Task
 	q := datastore.NewQuery(index)
 	userKey := datastore.NameKey(userIndex, ctx.AuthUser.Email, nil)
@@ -102,19 +117,15 @@ func GetTasks(ctx *authcontext.Context) ([]Task, error) {
 	}
 
 	for k, v := range output {
-		if v.IncidentsCount > 0 {
-			var count int
-			incidentQuery := datastore.NewQuery(`Incident`).
-				Filter(`TaskID =`, v.ID).
-				Filter(`Status =`, 1)
-			count, err = ctx.DataStoreClient.Count(ctx.AppEngineCtx, incidentQuery)
-			if err != nil {
-				return output, err
-			}
-			output[k].PendingIncidentsCount = count
+		count := make(chan int, len(output))
+		go v.getIncidentCount(ctx, 1, count)
+		if err == nil {
+			c := <-count
+			output[k].PendingIncidentsCount = c
 		}
 	}
-
+	elapsed := time.Since(start)
+	glog.Infof("TGetTasks took %s", elapsed)
 	return output, nil
 }
 

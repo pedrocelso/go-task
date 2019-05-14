@@ -1,9 +1,10 @@
 package controllers
 
 import (
-	"github.com/golang/glog"
 	"net/http"
 	"strconv"
+
+	"github.com/golang/glog"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pedrocelso/go-task/lib/http/authcontext"
@@ -28,8 +29,8 @@ func CreateIncident(c *gin.Context) {
 	}
 
 	if err != nil {
-		glog.Errorf("ERROR: %v", err.Error())
 		c.JSON(http.StatusPreconditionFailed, ResponseObject{"error": err.Error()})
+		glog.Errorf("ERROR: %v", err.Error())
 	}
 }
 
@@ -91,8 +92,8 @@ func UpdateIncident(c *gin.Context) {
 		var incidentID int64
 		incidentID, err = strconv.ParseInt(c.Param("incidentId"), 10, 64)
 		if err != nil {
-			glog.Errorf("ERROR: Failed to parse incidentID.")
 			c.JSON(http.StatusPreconditionFailed, ResponseObject{"error": err.Error()})
+			glog.Errorf("ERROR: Failed to parse incidentID.")
 		}
 
 		updatedIncident.ID = incidentID
@@ -102,8 +103,8 @@ func UpdateIncident(c *gin.Context) {
 	}
 
 	if err != nil {
-		glog.Errorf("ERROR: %v", err.Error())
 		c.JSON(http.StatusPreconditionFailed, ResponseObject{"error": err.Error()})
+		glog.Errorf("ERROR: %v", err.Error())
 	}
 }
 
@@ -120,14 +121,14 @@ func DeleteIncident(c *gin.Context) {
 	ctx, _ := authcontext.NewAuthContext(c)
 	incidentID, err = strconv.ParseInt(c.Param("incidentId"), 10, 64)
 	if err != nil {
-		glog.Errorf("ERROR: %v", err.Error())
 		c.JSON(http.StatusPreconditionFailed, ResponseObject{"error": err.Error()})
+		glog.Errorf("ERROR: %v", err.Error())
 	}
 
 	err = incident.Delete(ctx, taskID, incidentID)
 	if err != nil {
-		glog.Errorf("ERROR: %v", err.Error())
 		c.JSON(http.StatusPreconditionFailed, ResponseObject{"error": err.Error()})
+		glog.Errorf("ERROR: %v", err.Error())
 	}
 	c.JSON(http.StatusOK, ResponseObject{"result": "ok"})
 }

@@ -40,8 +40,8 @@ func CreateUser(c *gin.Context) {
 	}
 
 	if err != nil {
-		glog.Errorf("ERROR: %v", err.Error())
 		c.JSON(http.StatusPreconditionFailed, ResponseObject{"error": err.Error()})
+		glog.Errorf("ERROR: %v", err.Error())
 	}
 }
 
@@ -95,8 +95,8 @@ func UpdateUser(c *gin.Context) {
 	}
 
 	if err != nil {
-		glog.Errorf("ERROR: %v", err.Error())
 		c.JSON(http.StatusPreconditionFailed, ResponseObject{"error": err.Error()})
+		glog.Errorf("ERROR: %v", err.Error())
 	}
 }
 
@@ -108,8 +108,8 @@ func DeleteUser(c *gin.Context) {
 	err := user.Delete(ctx, usrEmail)
 
 	if err != nil {
-		glog.Errorf("ERROR: %v", err.Error())
 		c.JSON(http.StatusPreconditionFailed, ResponseObject{"error": err.Error()})
+		glog.Errorf("ERROR: %v", err.Error())
 	}
 	c.JSON(http.StatusOK, ResponseObject{"result": "ok"})
 }
