@@ -25,9 +25,10 @@ var taskCollection = map[string]map[int64]task.Task{
 			IncidentsCount: 1,
 		},
 		4: task.Task{
-			ID:          4,
-			Name:        `Task 4`,
-			Description: `Description 4`,
+			ID:             4,
+			Name:           `Task 4`,
+			Description:    `Description 4`,
+			IncidentsCount: 2,
 		},
 	},
 }

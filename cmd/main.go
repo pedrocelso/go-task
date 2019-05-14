@@ -17,6 +17,7 @@ func main() {
 
 	public := v1.Group("/public")
 	public.POST("/signin", controllers.AuthenticateUser)
+	public.POST("/signup", controllers.CreateUser)
 
 	users := v1.Group("/users")
 	users.Use(controllers.CheckJWT(os.Getenv("JWT_SECRET")))
