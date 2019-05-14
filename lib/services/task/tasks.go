@@ -86,6 +86,7 @@ func GetByID(ctx *authcontext.Context, id int64) (*Task, error) {
 
 // GetTasks Fetches all tasks for the authenticated user
 func GetTasks(ctx *authcontext.Context) ([]Task, error) {
+	start := time.Now()
 	var output []Task
 	q := datastore.NewQuery(index)
 	userKey := datastore.NameKey(userIndex, ctx.AuthUser.Email, nil)
@@ -114,7 +115,8 @@ func GetTasks(ctx *authcontext.Context) ([]Task, error) {
 			output[k].PendingIncidentsCount = count
 		}
 	}
-
+	elapsed := time.Since(start)
+	glog.Infof("TGetTasks took %s", elapsed)
 	return output, nil
 }
 
